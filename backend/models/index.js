@@ -41,7 +41,7 @@ db.Materials = require('./materialsModel.js')(sequelize, DataTypes)
 db.Receipt = require('./receiptModel.js')(sequelize, DataTypes)
 db.ReceiptItems = require('./receiptItemsModel.js')(sequelize, DataTypes)
 db.Offer = require('./offerModel.js')(sequelize, DataTypes)
-db.OfferItems = require('./offerItemsModel.js')(sequelize, DataTypes)
+db.OfferItems = require('./offerModel.js')(sequelize, DataTypes)
 db.WarehouseChange = require('./warehouseChangeModel.js')(sequelize, DataTypes)
 
 Object.keys(db).forEach(modelName => {
