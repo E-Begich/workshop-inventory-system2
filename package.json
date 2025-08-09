@@ -1,7 +1,6 @@
 {
   "name": "inventory",
   "version": "1.0.0",
-   "proxy": "http://127.0.0.1:8080",
   "description": "student project",
   "main": "server.js",
   "scripts": {
@@ -13,16 +12,6 @@
     "mysql"
   ],
   "author": "Emina Begic",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.14.3",
-    "pdfkit": "^0.17.1",
-    "qrcode": "^1.5.4",
-    "sequelize": "^6.37.7"
-  }
+  "license": "ISC"
+
 }
