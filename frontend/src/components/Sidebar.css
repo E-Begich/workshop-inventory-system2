@@ -1,0 +1,49 @@
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sidebar {
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #b22222;
+  transition: transform 0.3s ease;
+  z-index: 1040; /* iznad ostalog sadržaja */
+}
+
+/* Na manjim ekranima sidebar je skriven po defaultu */
+@media (max-width: 767.98px) {
+  .sidebar {
+    height: 100vh;
+    transform: translateX(-100%);
+    position: fixed;
+  }
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* Dugme za zatvaranje sidebar-a na malim ekranima */
+  .sidebar-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+}
+
+/* Na većim ekranima sidebar je uvijek vidljiv */
+@media (min-width: 768px) {
+  .sidebar {
+    transform: translateX(0);
+  }
+}
+
+.sidebar .nav .nav-link {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar .nav .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
