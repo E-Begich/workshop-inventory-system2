@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import HomePage from './pages/HomePage';
 import ShowMaterials from './pages/ShowMaterials';
 import ShowSupplier from './pages/ShowSupplier';
@@ -19,17 +21,18 @@ const Layout = ({ sidebarOpen, toggleSidebar }) => {
     <div className="d-flex">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-      <div 
-        className="flex-grow-1" 
-        style={{ 
-          marginLeft: sidebarOpen && window.innerWidth >= 768 ? "250px" : "0", 
-          minHeight: "100vh", 
+      <div
+        className="flex-grow-1"
+        style={{
+          marginLeft: sidebarOpen && window.innerWidth >= 768 ? "250px" : "0",
+          minHeight: "100vh",
           transition: "margin-left 0.3s ease"
         }}
       >
         <TopNavBar />
         <div className="p-4" style={{ paddingTop: "80px" }}>
           <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/homePage" element={<HomePage />} />
             <Route path="/getAllMaterial" element={<ShowMaterials />} />
             <Route path="/getAllSupplier" element={<ShowSupplier />} />
@@ -56,7 +59,7 @@ const AppWrapper = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if(window.innerWidth < 768) {
+      if (window.innerWidth < 768) {
         setSidebarOpen(false);
       } else {
         setSidebarOpen(true);
@@ -68,11 +71,21 @@ const AppWrapper = () => {
   }, []);
 
   // Ako smo na login stranici, ne prikazuj sidebar i navbar, samo login
-  if(location.pathname === '/Login') {
-    return <Login />;
+   if (location.pathname === '/login') {
+    return (
+      <>
+        <Login />
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />
+      </>
+    );
   }
 
-  return <Layout sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />;
+    return (
+    <>
+      <Layout sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />
+    </>
+  );
 };
 
 const App = () => {

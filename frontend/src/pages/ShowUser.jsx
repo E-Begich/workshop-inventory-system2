@@ -49,7 +49,16 @@ const ShowUser = () => {
         }
     };
 
+    const validatePassword = (password) => {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return passwordRegex.test(password);
+    };
+
     const handleAddUser = async () => {
+        if (!validatePassword(formData.Password)) {
+            toast.error('Lozinka mora imati minimalno 8 znakova, jedno veliko slovo, jedno malo slovo, jedan broj i jedan specijalni znak.');
+            return;
+        }
         try {
             await axios.post('/api/aplication/addUser', formData);
             setShowModal(false);
@@ -70,6 +79,10 @@ const ShowUser = () => {
     };
 
     const handleEditUser = async () => {
+        if (!validatePassword(formData.Password)) {
+            toast.error('Lozinka mora imati minimalno 8 znakova, jedno veliko slovo, jedno malo slovo, jedan broj i jedan specijalni znak.');
+            return;
+        }
         try {
             await axios.put(`/api/aplication/updateUser/${selectedUserId}`, formData);
             setShowModal(false);
