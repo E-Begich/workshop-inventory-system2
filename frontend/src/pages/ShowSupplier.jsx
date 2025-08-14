@@ -56,8 +56,74 @@ const ShowSuppliers = () => {
     }
   };
 
+  const validateForm = (data) => {
+    if (!data.Type) {
+      showError('Unesite Vrstu dobavljača.');
+      return false;
+    }
+    // Tip Tvrtka - provjera Naziva i OIB-a
+    if (data.TypeClient === 'Tvrtka') {
+      if (!formData.Name || formData.Name.trim() === '') {
+        showError("Naziv tvrtke je obavezan.");
+        return false;
+      }
+      if (!data.PersonalNumber || !/^\d{11}$/.test(formData.PersonalNumber)) {
+        showError("OIB mora sadržavati točno 11 brojeva.");
+        return false;
+      }
+    }
+    if (!data.ContactName) {
+      showError('Unesite ime i prezime.');
+      return false;
+    }
+    if (!data.Contact) {
+      showError('Unesite kontakt.');
+      return false;
+    }
+    // provjera valjanosti emaila
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.Email)) {
+      showError('Email mora biti u ispravnom formatu (npr. korisnik@example.com).');
+      return false;
+    }
+    if (!data.Address) {
+      showError('Odaberite adresu.');
+      return false;
+    }
+    if (!data.City) {
+      showError('Odaberite grad.');
+      return false;
+    }
+    if (!data.PostalCode) {
+      showError('Odaberite poštanski broj.');
+      return false;
+    }
+    if (!data.Country) {
+      showError('Odaberite Državu.');
+      return false;
+    }
+    return true;
+  };
+
+
+  let errorToastId = null;
+
+  const showError = (msg) => {
+    if (errorToastId && toast.isActive(errorToastId)) return;
+
+    errorToastId = toast.error(msg, {
+      autoClose: 3000,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true
+    });
+
+    return errorToastId;
+  };
+
+
   const handleAddSupplier = async () => {
-    if (!isFormValid()) return; // validation
+    if (!validateForm(formData)) return;
     try {
       await api.post('/aplication/addSupplier', formData);
       setShowModal(false);
@@ -82,7 +148,7 @@ const ShowSuppliers = () => {
   };
 
   const handleEditSupplier = async () => {
-    if (!isFormValid()) return; // ➕ validacija
+    if (!validateForm(formData)) return;
     try {
       await api.put(`/aplication/updateSupplier/${selectedSupplierId}`, formData);
       setShowModal(false);
@@ -134,15 +200,6 @@ const ShowSuppliers = () => {
       PostalCode: '',
       Country: ''
     });
-  };
-
-  // VALIDACIJA PRAVILA
-  const isFormValid = () => {
-    if (formData.Type === 'Tvrtka' && (!formData.Name || formData.Name.trim() === '')) {
-      toast.error("Naziv tvrtke je obavezan kada je tip 'Tvrtka'.");
-      return false;
-    }
-    return true;
   };
 
   const openEditModal = (supplier) => {
@@ -363,7 +420,7 @@ const ShowSuppliers = () => {
         <Modal.Body>
           <Form>
             <Form.Group className="mb-2">
-              <Form.Label>Tip klijenta</Form.Label>
+              <Form.Label>Tip dobavljača</Form.Label>
               <Form.Select
                 value={formData.Type}
                 onChange={(e) => {
@@ -375,7 +432,7 @@ const ShowSuppliers = () => {
                   }));
                 }}
               >
-                <option value="">Odaberi vrstu klijenta</option>
+                <option value="">Odaberi tip dobavljača</option>
                 {type.map((loc) => (
                   <option key={loc} value={loc}>
                     {loc}
