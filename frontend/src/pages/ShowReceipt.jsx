@@ -113,6 +113,7 @@ const ShowReceipt = () => {
     };
 
     const apiUrl = process.env.REACT_APP_API_URL;
+    //console.log("API URL:", apiUrl); // za provjeru
 
     return (
         <div className="container px-3 mt-4">
@@ -192,10 +193,40 @@ const ShowReceipt = () => {
                                             variant="danger"
                                             size="sm"
                                             className="me-2"
-                                            onClick={() => window.open(`${apiUrl}/api/aplication/generateReceiptPDF/${receipt.ID_receipt}`, '_blank')}
+                                            onClick={async () => {
+                                                if (!receipt) {
+                                                    alert('Račun još nije učitan.');
+                                                    return;
+                                                }
+
+                                                const token = localStorage.getItem('token');
+                                                try {
+                                                    const response = await fetch(`${apiUrl}/api/aplication/generateReceiptPDF/${receipt.ID_receipt}`, {
+                                                        method: 'GET',
+                                                        headers: {
+                                                            'Authorization': `Bearer ${token}`,
+                                                        }
+                                                    });
+
+                                                    if (!response.ok) {
+                                                        throw new Error('Greška pri preuzimanju PDF-a');
+                                                    }
+
+                                                    const blob = await response.blob();
+                                                    const url = window.URL.createObjectURL(blob);
+
+                                                    // Otvori PDF u novom tabu
+                                                    window.open(url, '_blank');
+
+                                                } catch (err) {
+                                                    console.error(err);
+                                                    alert('Došlo je do greške pri preuzimanju PDF-a');
+                                                }
+                                            }}
                                         >
-                                            Izvezi PDF
+                                            📄 Prikaži PDF
                                         </Button>
+
                                     </td>
                                 </tr>
                             ))}

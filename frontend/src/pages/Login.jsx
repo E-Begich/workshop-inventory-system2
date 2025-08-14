@@ -60,6 +60,9 @@ const Login = () => {
 
       // Spremi token za kasniju autorizaciju
       localStorage.setItem("token", token);
+      localStorage.setItem("Name", user.Name);
+      localStorage.setItem("Lastname", user.Lastname);
+      localStorage.setItem("Role", user.Role);
 
       //console.log(response.data);
       toast.success(`Dobrodošao/la, ${user.Name} ${user.Lastname}`);

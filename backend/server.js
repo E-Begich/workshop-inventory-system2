@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express()
 
 //var corOptions = {
- //   origin: 'https://localhost:8081'
+//   origin: 'https://localhost:8081'
 //}
 
 
@@ -14,10 +14,15 @@ const app = express()
 //middleware
 
 //app.use(cors(corOptions))
+app.use(cors({
+    origin: 'http://localhost:3000',  // tvoj frontend
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'] // vrlo važno za token
+}));
 
 app.use(express.json())
 
-app.use(express.urlencoded({ extended: true}))
+app.use(express.urlencoded({ extended: true }))
 
 
 //routers
@@ -26,17 +31,14 @@ app.use('/api/aplication', router)
 
 
 //testing api
-
 app.get('/', (req, res) => {
-    res.json({ message: 'hello from api'})
+    res.json({ message: 'hello from api' })
 })
 
 //port
-
 const PORT = process.env.PORT || 8080
 
 //server
-
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT} `)
 })
