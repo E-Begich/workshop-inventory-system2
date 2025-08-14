@@ -16,6 +16,8 @@ import Sidebar from "./components/Sidebar";
 import TopNavBar from "./components/TopNavBar";
 import Login from "./pages/Login";
 import PrivateRoute from "./components/PrivateRoute";  // koristimo PrivateRoute
+import { jwtDecode } from "jwt-decode"; 
+
 
 const Layout = ({ sidebarOpen, toggleSidebar }) => {
   return (
@@ -135,6 +137,27 @@ const AppWrapper = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Provjera isteka tokena
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const now = Date.now() / 1000; // sekunde
+
+        if (decoded.exp < now) {
+          alert("Prijava je istekla. Molimo prijavite se ponovno.");
+          localStorage.removeItem("token");
+          window.location.href = "/login"; // hard redirect
+        }
+      } catch (err) {
+        console.error("Neispravan token:", err);
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
+    }
+  }, [location]);
 
   // Ako smo na login stranici, ne prikazuj sidebar i navbar, samo login
   if (location.pathname === '/login') {
