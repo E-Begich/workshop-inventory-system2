@@ -225,9 +225,9 @@ const ShowService = () => {
                                 <td>{mat.ID_service}</td>
                                 <td>{mat.Name}</td>
                                 <td>{mat.Description}</td>
-                                <td>{mat.PriceNoTax}</td>
+                                <td>{mat.PriceNoTax} €</td>
                                 <td> {mat.Tax}%</td>
-                                <td>{mat.PriceTax}</td>
+                                <td>{mat.PriceTax} €</td>
 
                                 <td style={{ whiteSpace: 'nowrap' }}>
                                     <Button variant="warning" size="sm" className="me-2" onClick={() => openEditModal(mat)}>Uredi</Button>
