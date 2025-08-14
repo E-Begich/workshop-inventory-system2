@@ -93,9 +93,71 @@ const ShowMaterials = () => {
     return supplier ? (supplier.Name || supplier.ContactName) : 'Nepoznato';
   };
 
+  const validateForm = (data) => {
+    if (!data.NameMaterial) {
+      showError('Unesite naziv materijala.');
+      return false;
+    }
+    if (!data.CodeMaterial) {
+      showError('Unesite šifru materijala.');
+      return false;
+    }
+    if (!data.Amount) {
+      showError('Unesite količinu materijala.');
+      return false;
+    }
+    if (!data.Unit) {
+      showError('Unesite jedinicu materijala.');
+      return false;
+    }
+    if (!data.Location) {
+      showError('Unesite lokaciju materijala.');
+      return false;
+    }
+    if (!data.MinAmount) {
+      showError('Unesite minimalnu količinu koja smije biti u skladištu.');
+      return false;
+    }
+        if (!data.PurchasePrice) {
+      showError('Odaberite nabavnu cijenu bez PDV');
+      return false;
+    }
+        if (!data.SellingPrice) {
+      showError('Odaberite prodajnu cijenu bez PDV.');
+      return false;
+    }
+        if (!data.ID_supplier) {
+      showError('Odaberite dobavljača.');
+      return false;
+    }
+        if (!data.TypeChange) {
+      showError('Odaberite uvrstu promjene.');
+      return false;
+    }
+    return true;
+  };
+
+  let errorToastId = null;
+
+  const showError = (msg) => {
+    if (errorToastId && toast.isActive(errorToastId)) return;
+
+    errorToastId = toast.error(msg, {
+      autoClose: 3000,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true
+    });
+
+    return errorToastId;
+  };
+
+
 
 
   const handleAddMaterial = async () => {
+    if (!validateForm(formData)) return;
+
     try {
       await api.post('/aplication/addMaterial', formData);
       setShowModal(false);
@@ -122,6 +184,8 @@ const ShowMaterials = () => {
 
 
   const handleEditMaterial = async () => {
+    if (!validateForm(formData)) return;
+
     try {
       await api.put(`/aplication/updateMaterial/${selectedMaterialId}`, formData);
       setShowModal(false);
@@ -304,12 +368,12 @@ const ShowMaterials = () => {
                 <td>{mat.Location}</td>
                 <td>{mat.Description}</td>
                 <td>{mat.MinAmount}</td>
-                <td>{mat.PurchasePrice}</td>
-                <td>{mat.SellingPrice}</td>
+                <td>{mat.PurchasePrice} €</td>
+                <td>{mat.SellingPrice} €</td>
                 <td>{getSupplierName(mat.ID_supplier)}</td>
                 <td>{mat.TypeChange}</td>
-                <td>{(parseFloat(mat.PurchasePrice) * parseFloat(mat.Amount)).toFixed(2)}</td>
-                <td>{(parseFloat(mat.SellingPrice) * parseFloat(mat.Amount)).toFixed(2)}</td>
+                <td>{(parseFloat(mat.PurchasePrice) * parseFloat(mat.Amount)).toFixed(2)} €</td>
+                <td>{(parseFloat(mat.SellingPrice) * parseFloat(mat.Amount)).toFixed(2)} €</td>
                 <td style={{ whiteSpace: 'nowrap' }}>
                   <Button variant="warning" size="sm" className="me-2" onClick={() => openEditModal(mat)}>Uredi</Button>
                   <Button variant="danger" size="sm" onClick={() => {

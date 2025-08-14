@@ -136,12 +136,82 @@ const ShowClient = () => {
     };
 
     const isFormValid = () => {
-        if (formData.Type === 'Tvrtka' && (!formData.Name || formData.Name.trim() === '')) {
-            toast.error("Naziv tvrtke je obavezan kada je tip 'Tvrtka'.");
+        // Tip Tvrtka - provjera Naziva i OIB-a
+        if (formData.TypeClient === 'Tvrtka') {
+            if (!formData.Name || formData.Name.trim() === '') {
+                showError("Naziv tvrtke je obavezan.");
+                return false;
+            }
+            if (!formData.PersonalNumber || !/^\d{11}$/.test(formData.PersonalNumber)) {
+                showError("OIB mora sadržavati točno 11 brojeva.");
+                return false;
+            }
+        }
+
+        // Kontakt osoba obavezno
+        if (!formData.ContactName || formData.ContactName.trim() === '') {
+            showError("Ime i prezime kontakt osobe je obavezno.");
             return false;
         }
+
+        // Kontakt broj obavezno
+        if (!formData.Contact || formData.Contact.trim() === '') {
+            showError("Kontakt broj je obavezan.");
+            return false;
+        }
+
+        // Email provjera
+        if (!formData.Email || formData.Email.trim() === '') {
+            showError("Email je obavezan.");
+            return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.Email)) {
+            showError("Email mora biti u ispravnom formatu (npr. korisnik@example.com).");
+            return false;
+        }
+
+        // Adresa broj obavezno
+        if (!formData.Address || formData.Address.trim() === '') {
+            showError("Adresa je obavezna.");
+            return false;
+        }
+
+        // Kontakt broj obavezno
+        if (!formData.City || formData.City.trim() === '') {
+            showError("Grad je obavezan.");
+            return false;
+        }
+
+        // Kontakt broj obavezno
+        if (!formData.PostalCode || formData.PostalCode.trim() === '') {
+            showError("Poštanski broj je obavezan.");
+            return false;
+        }
+
+        // Država broj obavezno
+        if (!formData.Country || formData.Country.trim() === '') {
+           showError("Država je obavezna.");
+            return false;
+        }
+
         return true;
     };
+
+        let errorToastId = null;
+    
+        const showError = (msg) => {
+            if (errorToastId && toast.isActive(errorToastId)) return;
+    
+            errorToastId = toast.error(msg, {
+                autoClose: 3000,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true
+            });
+    
+            return errorToastId;
+        };
 
     const openEditModal = (clients) => {
         setIsEditing(true);
