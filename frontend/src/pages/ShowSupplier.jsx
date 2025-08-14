@@ -80,6 +80,10 @@ const ShowSuppliers = () => {
       showError('Unesite kontakt.');
       return false;
     }
+    if (!data.Email) {
+      showError('Unesite email.');
+      return false;
+    }
     // provjera valjanosti emaila
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.Email)) {

@@ -147,7 +147,6 @@ const ShowClient = () => {
                 return false;
             }
         }
-
         // Kontakt osoba obavezno
         if (!formData.ContactName || formData.ContactName.trim() === '') {
             showError("Ime i prezime kontakt osobe je obavezno.");
