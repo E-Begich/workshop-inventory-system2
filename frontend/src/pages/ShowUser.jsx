@@ -50,16 +50,69 @@ const ShowUser = () => {
         }
     };
 
+    const validateForm = (data) => {
+        if (!data.Name) {
+            showError('Unesite ime.');
+            return false;
+        }
+        if (!data.Lastname) {
+            showError('Unesite prezime.');
+            return false;
+        }
+        if (!data.Email) {
+            showError('Unesite email.');
+            return false;
+        }
+        // provjera valjanosti emaila
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(data.Email)) {
+            showError('Email mora biti u ispravnom formatu (npr. korisnik@example.com).');
+            return false;
+        }
+        if (!data.Contact) {
+            showError('Unesite kontakt broj.');
+            return false;
+        }
+        if (!data.Password) {
+            showError('Unesite lozinku.');
+            return false;
+        }
+        if (!validatePassword(data.Password)) {
+            showError('Lozinka mora imati min. 8 znakova, veliko i malo slovo, broj i poseban znak.');
+            return false;
+        }
+        if (!data.Role) {
+            showError('Odaberite ulogu korisnika.');
+            return false;
+        }
+        return true;
+    };
+
     const validatePassword = (password) => {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         return passwordRegex.test(password);
     };
 
+    let errorToastId = null;
+
+    const showError = (msg) => {
+        if (errorToastId && toast.isActive(errorToastId)) return;
+
+        errorToastId = toast.error(msg, {
+            autoClose: 3000,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+        });
+
+        return errorToastId;
+    };
+
+
+
     const handleAddUser = async () => {
-        if (!validatePassword(formData.Password)) {
-            toast.error('Lozinka mora imati minimalno 8 znakova, jedno veliko slovo, jedno malo slovo, jedan broj i jedan specijalni znak.');
-            return;
-        }
+        if (!validateForm(formData)) return;
+
         try {
             await api.post('/aplication/addUser', formData);
             setShowModal(false);
@@ -79,11 +132,9 @@ const ShowUser = () => {
         }
     };
 
+
     const handleEditUser = async () => {
-        if (!validatePassword(formData.Password)) {
-            toast.error('Lozinka mora imati minimalno 8 znakova, jedno veliko slovo, jedno malo slovo, jedan broj i jedan specijalni znak.');
-            return;
-        }
+        if (!validateForm(formData)) return;
         try {
             await api.put(`/aplication/updateUser/${selectedUserId}`, formData);
             setShowModal(false);
