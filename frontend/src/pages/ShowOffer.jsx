@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Modal, Button, Form, Table, InputGroup, FormControl } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { Link } from "react-router-dom";
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
+
 
 const ShowOffer = () => {
     const [offers, setOffers] = useState([]);
@@ -39,7 +40,7 @@ const ShowOffer = () => {
     // Dohvati sve ponude
     const fetchOffers = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllOffer');
+            const res = await api.get('/aplication/getAllOffer');
             setOffers(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju ponuda:', error);
@@ -49,7 +50,7 @@ const ShowOffer = () => {
 
     const fetchClients = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllClients');
+            const res = await api.get('/aplication/getAllClients');
             setClient(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju dobavljača', error);
@@ -58,7 +59,7 @@ const ShowOffer = () => {
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllUsers');
+            const res = await api.get('/aplication/getAllUsers');
             setUsers(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju korisnika', error);
@@ -83,7 +84,7 @@ const ShowOffer = () => {
 
     const fetchPayment = async () => {
         try {
-            const res = await axios.get('/api/aplication/getPaymentEnum');
+            const res = await api.get('/aplication/getPaymentEnum');
             setPayment(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju načina plaćanja', error);
@@ -106,7 +107,7 @@ const ShowOffer = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`/api/aplication/deleteOffer/${deleteId}`);
+            await api.delete(`/aplication/deleteOffer/${deleteId}`);
             toast.success('Ponuda obrisana.');
             fetchOffers();
         } catch (error) {
@@ -122,7 +123,7 @@ const ShowOffer = () => {
         //console.log("Odabrani način plaćanja:", paymentMethod);  // provjeri vrijednost
         setIsCreatingReceipt(true);
         try {
-            await axios.post('/api/aplication/createReceiptFromOffer', {
+            await api.post('/aplication/createReceiptFromOffer', {
                 ID_offer: selectedOffer.ID_offer,
                 ID_user: selectedOffer.ID_user, // ako uzimaš iz ponude
                 PaymentMethod: paymentMethod
@@ -141,7 +142,7 @@ const ShowOffer = () => {
 
     const openDetailsModal = async (id) => {
         try {
-            const res = await axios.get(`/api/aplication/getOfferWithDetails/${id}`);
+            const res = await api.get(`/aplication/getOfferWithDetails/${id}`);
             setDetailedOffer(res.data);
             setDetailsModalVisible(true);
         } catch (error) {

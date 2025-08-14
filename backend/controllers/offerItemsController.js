@@ -1,4 +1,4 @@
-const db = require('../models')
+const db = require('../models');
 
 //creating main models
 const User = db.User
@@ -86,10 +86,19 @@ const addOfferItems = async (req, res) => {
     }
 
     // 8. Get enum values for TypeItem
-    const getTypeItemEnum = (req, res) => {
-      const typeEnums = OfferItems.rawAttributes.TypeItem.values;
-      res.status(200).json(typeEnums);
-    };
+const getTypeItemEnum = (req, res) => {
+  try {
+    if (!OfferItems.rawAttributes.TypeItem) {
+      return res.status(500).json({ message: "Polje TypeItem nije definirano u modelu." });
+    }
+
+    const typeEnums = OfferItems.rawAttributes.TypeItem.values;
+    res.status(200).json(typeEnums);
+  } catch (error) {
+    console.error('Greška u getTypeItemEnum:', error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
     module.exports = {
       addOfferItems,

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Modal, Button, Form, Table, InputGroup, FormControl } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
+
 
 const ShowSuppliers = () => {
   const [selectedSupplierId, setSelectedSupplierId] = useState(null);
@@ -39,7 +40,7 @@ const ShowSuppliers = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const res = await axios.get('/api/aplication/getAllSupplier');
+      const res = await api.get('/aplication/getAllSupplier');
       setSuppliers(res.data);
     } catch (error) {
       console.error('Greška pri dohvaćanju dobavljača', error);
@@ -48,7 +49,7 @@ const ShowSuppliers = () => {
 
   const fetchType = async () => {
     try {
-      const res = await axios.get('/api/aplication/getTypeEnum');
+      const res = await api.get('/aplication/getTypeEnum');
       setType(res.data);
     } catch (error) {
       console.error('Greška pri dohvaćanju tipa klijenta', error);
@@ -58,7 +59,7 @@ const ShowSuppliers = () => {
   const handleAddSupplier = async () => {
     if (!isFormValid()) return; // validation
     try {
-      await axios.post('/api/aplication/addSupplier', formData);
+      await api.post('/aplication/addSupplier', formData);
       setShowModal(false);
       fetchSuppliers();
       toast.success('Dobavljač uspješno dodan!');
@@ -83,7 +84,7 @@ const ShowSuppliers = () => {
   const handleEditSupplier = async () => {
     if (!isFormValid()) return; // ➕ validacija
     try {
-      await axios.put(`/api/aplication/updateSupplier/${selectedSupplierId}`, formData);
+      await api.put(`/aplication/updateSupplier/${selectedSupplierId}`, formData);
       setShowModal(false);
       fetchSuppliers();
       toast.success('Dobavljač ažuriran!');
@@ -110,7 +111,7 @@ const ShowSuppliers = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/api/aplication/deleteSupplier/${deleteId}`);
+      await api.delete(`/aplication/deleteSupplier/${deleteId}`);
       setShowDeleteConfirm(false);
       fetchSuppliers();
       toast.success('Dobavljač je uspješno obrisan!');

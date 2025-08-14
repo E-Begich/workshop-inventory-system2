@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Button, Form, Table, Row, Col, Card } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
+
 
 
 const ShowOffer = () => {
@@ -48,7 +49,7 @@ const ShowOffer = () => {
 
     const fetchClients = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllClients');
+            const res = await api.get('/aplication/getAllClients');
             setClients(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju klijenata', error);
@@ -57,7 +58,7 @@ const ShowOffer = () => {
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllUsers');
+            const res = await api.get('/aplication/getAllUsers');
             setUsers(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju korisnika', error);
@@ -66,7 +67,7 @@ const ShowOffer = () => {
 
     const fetchMaterials = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllMaterial');
+            const res = await api.get('/aplication/getAllMaterial');
             setMaterials(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju dobavljača', error);
@@ -75,7 +76,7 @@ const ShowOffer = () => {
 
     const fetchService = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllService');
+            const res = await api.get('/aplication/getAllService');
             setService(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju usluga', error);
@@ -84,9 +85,9 @@ const ShowOffer = () => {
 
     const fetchTypeItem = async () => {
         try {
-            const res = await axios.get('/api/aplication/getTypeItemEnum');
+            const res = await api.get('/aplication/getTypeItemEnum');
             setTypeEnum(res.data);
-            //  console.log(res.data)
+              //console.log(res.data)
         } catch (error) {
             console.error('Greška pri dohvaćanju', error);
 
@@ -203,8 +204,8 @@ const ShowOffer = () => {
             // console.log(offerData);
 
             // Kreiraj ponudu i dohvati ID
-            // console.log(offerData)
-            const res = await axios.post('/api/aplication/addOffer', offerData);
+             console.log(offerData)
+            const res = await api.post('/aplication/addOffer', offerData);
             const createdOfferId = res.data.ID_offer;
 
             // Pripremi stavke
@@ -216,7 +217,7 @@ const ShowOffer = () => {
             // console.log("Items to send:", itemsToSend);
 
             // Spremi stavke
-            await axios.post('/api/aplication/addOfferItems', itemsToSend);
+            await api.post('/aplication/addOfferItems', itemsToSend);
 
             toast.success('Ponuda uspješno kreirana!');
 

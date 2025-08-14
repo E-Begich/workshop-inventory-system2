@@ -15,12 +15,12 @@ import ShowReceipt from './pages/ShowReceipt';
 import Sidebar from "./components/Sidebar";
 import TopNavBar from "./components/TopNavBar";
 import Login from "./pages/Login";
+import PrivateRoute from "./components/PrivateRoute";  // koristimo PrivateRoute
 
 const Layout = ({ sidebarOpen, toggleSidebar }) => {
   return (
     <div className="d-flex">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-
       <div
         className="flex-grow-1"
         style={{
@@ -33,23 +33,94 @@ const Layout = ({ sidebarOpen, toggleSidebar }) => {
         <div className="p-4" style={{ paddingTop: "80px" }}>
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/homePage" element={<HomePage />} />
-            <Route path="/getAllMaterial" element={<ShowMaterials />} />
-            <Route path="/getAllSupplier" element={<ShowSupplier />} />
-            <Route path="/getAllUsers" element={<ShowUser />} />
-            <Route path="/getAllService" element={<ShowService />} />
-            <Route path="/getAllClients" element={<ShowClient />} />
-            <Route path="/addOffer" element={<CreateOffer />} />
-            <Route path="/addReceipt" element={<CreateReceipt />} />
-            <Route path="/showOffer" element={<ShowOffer />} />
-            <Route path="/showReceipt" element={<ShowReceipt />} />
+
+            {/* Sve rute sada traže login */}
+            <Route
+              path="/homePage"
+              element={
+                <PrivateRoute>
+                  <HomePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/getAllMaterial"
+              element={
+                <PrivateRoute>
+                  <ShowMaterials />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/getAllSupplier"
+              element={
+                <PrivateRoute>
+                  <ShowSupplier />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/getAllUsers"
+              element={
+                <PrivateRoute>
+                  <ShowUser />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/getAllService"
+              element={
+                <PrivateRoute>
+                  <ShowService />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/getAllClients"
+              element={
+                <PrivateRoute>
+                  <ShowClient />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/addOffer"
+              element={
+                <PrivateRoute>
+                  <CreateOffer />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/addReceipt"
+              element={
+                <PrivateRoute>
+                  <CreateReceipt />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/showOffer"
+              element={
+                <PrivateRoute>
+                  <ShowOffer />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/showReceipt"
+              element={
+                <PrivateRoute>
+                  <ShowReceipt />
+                </PrivateRoute>
+              }
+            />
           </Routes>
         </div>
       </div>
     </div>
   );
 };
-
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -59,19 +130,14 @@ const AppWrapper = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
-      }
+      setSidebarOpen(window.innerWidth >= 768);
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Ako smo na login stranici, ne prikazuj sidebar i navbar, samo login
-   if (location.pathname === '/login') {
+  if (location.pathname === '/login') {
     return (
       <>
         <Login />
@@ -80,7 +146,7 @@ const AppWrapper = () => {
     );
   }
 
-    return (
+  return (
     <>
       <Layout sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />

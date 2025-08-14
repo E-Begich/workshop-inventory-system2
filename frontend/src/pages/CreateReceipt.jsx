@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Button, Form, Table, Row, Col, Card } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
 
 const CreateReceipt = () => {
     const [materials, setMaterials] = useState([]);
@@ -45,7 +45,7 @@ const CreateReceipt = () => {
     }, []);
     const fetchClients = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllClients');
+            const res = await api.get('/aplication/getAllClients');
             setClients(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju klijenata', error);
@@ -53,7 +53,7 @@ const CreateReceipt = () => {
     };
     const fetchUsers = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllUsers');
+            const res = await api.get('/aplication/getAllUsers');
             setUsers(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju korisnika', error);
@@ -61,7 +61,7 @@ const CreateReceipt = () => {
     };
     const fetchMaterials = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllMaterial');
+            const res = await api.get('/aplication/getAllMaterial');
             setMaterials(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju materijala', error);
@@ -69,7 +69,7 @@ const CreateReceipt = () => {
     };
     const fetchServices = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllService');
+            const res = await api.get('/aplication/getAllService');
             setService(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju usluga', error);
@@ -78,7 +78,7 @@ const CreateReceipt = () => {
 
     const fetchTypeItem = async () => {
         try {
-            const res = await axios.get('/api/aplication/getRecTypeItemEnum');
+            const res = await api.get('/aplication/getRecTypeItemEnum');
             setTypeEnum(res.data);
             //  console.log(res.data)
         } catch (error) {
@@ -89,7 +89,7 @@ const CreateReceipt = () => {
 
     const fetchPayment = async () => {
         try {
-            const res = await axios.get('/api/aplication/getPaymentEnum');
+            const res = await api.get('/aplication/getPaymentEnum');
             setPayment(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju načina plaćanja', error);
@@ -174,7 +174,7 @@ const CreateReceipt = () => {
         for (const item of receiptItems) {
             if (item.ID_material) {
                 try {
-                    const res = await axios.post('/api/aplication/checkMaterialStock', {
+                    const res = await api.post('/aplication/checkMaterialStock', {
                         ID_material: item.ID_material,
                         requestedAmount: Number(item.Amount),
                     });
@@ -254,7 +254,7 @@ const CreateReceipt = () => {
                 PriceTax: totals.priceTax.toFixed(2),
             };
 
-            const res = await axios.post('/api/aplication/addReceipt', receiptData);
+            const res = await api.post('/aplication/addReceipt', receiptData);
             const createdReceiptId = res.data.ID_receipt;
 
             // ✅ Spremi stavke
@@ -263,7 +263,7 @@ const CreateReceipt = () => {
                 ID_receipt: createdReceiptId,
                 Tax: item.Tax ?? 25,
             }));
-            await axios.post('/api/aplication/addReceiptItem', itemsToSend);
+            await api.post('/aplication/addReceiptItem', itemsToSend);
 
             // ✅ Ažuriraj skladište
             for (const item of receiptItems) {
@@ -273,7 +273,7 @@ const CreateReceipt = () => {
 
                     const updatedAmount = material.Amount - item.Amount;
 
-                    await axios.put(`/api/aplication/updateMaterialAmount/${material.ID_material}`, {
+                    await api.put(`/aplication/updateMaterialAmount/${material.ID_material}`, {
                         Amount: item.Amount, //šalje samo količinu koja je upisana u račun
                     });
 

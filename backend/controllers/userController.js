@@ -164,7 +164,7 @@ const loginUser = async (req, res) => {
         res.json({
             message: 'Prijava uspješna',
             token,
-            user: { ID_user: user.ID_user, Name: user.Name, Role: user.Role }
+            user: { ID_user: user.ID_user, Name: user.Name, Lastname: user.Lastname, Role: user.Role }
         });
     } catch (error) {
         console.error(error);

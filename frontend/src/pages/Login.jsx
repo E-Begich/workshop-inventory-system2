@@ -6,17 +6,16 @@ import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Lokalna validacija grešaka
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
-
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -62,6 +61,7 @@ const Login = () => {
       // Spremi token za kasniju autorizaciju
       localStorage.setItem("token", token);
 
+      //console.log(response.data);
       toast.success(`Dobrodošao/la, ${user.Name} ${user.Lastname}`);
 
       setTimeout(() => {
@@ -77,7 +77,7 @@ const Login = () => {
     }
   };
 
-   return (
+  return (
     <div className="d-flex flex-column" style={{ minHeight: "100vh", overflow: "hidden" }} >
       <main
         className="container d-flex justify-content-center align-items-center flex-grow-1"
@@ -173,18 +173,7 @@ const Login = () => {
                 {/* Remember i zaboravljena lozinka */}
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id="rememberMe"
-                    />
-                    <label className="form-check-label ms-2" htmlFor="rememberMe">
-                      Zapamti me
-                    </label>
                   </div>
-                  <a href="#!" className="text-body">
-                    Zaboravljena lozinka?
-                  </a>
                 </div>
 
                 {error && <p style={{ color: "red" }}>{error}</p>}

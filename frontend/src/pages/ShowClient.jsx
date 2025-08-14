@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Modal, Button, Form, Table, InputGroup, FormControl } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
 
 const ShowClient = () => {
     const [selectedClientId, setSelectedClientId] = useState(null);
@@ -39,7 +39,7 @@ const ShowClient = () => {
 
     const fetchClients = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllClients');
+            const res = await api.get('/aplication/getAllClients');
             setClients(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju klijenata', error);
@@ -48,7 +48,7 @@ const ShowClient = () => {
 
     const fetchType = async () => {
         try {
-            const res = await axios.get('/api/aplication/getTypeClientEnum');
+            const res = await api.get('/aplication/getTypeClientEnum');
             setType(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju tipa klijenta', error);
@@ -58,7 +58,7 @@ const ShowClient = () => {
     const handleAddClient = async () => {
         if (!isFormValid()) return; // validation
         try {
-            await axios.post('/api/aplication/addClient', formData);
+            await api.post('/aplication/addClient', formData);
             setShowModal(false);
             fetchClients();
             toast.success('Klijent uspješno dodan!');
@@ -83,7 +83,7 @@ const ShowClient = () => {
     const handleEditClient = async () => {
         if (!isFormValid()) return; // validacija
         try {
-            await axios.put(`/api/aplication/updateClient/${selectedClientId}`, formData);
+            await api.put(`/aplication/updateClient/${selectedClientId}`, formData);
             setShowModal(false);
             fetchClients();
             toast.success('Klijent je ažuriran!');
@@ -110,7 +110,7 @@ const ShowClient = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`/api/aplication/deleteClient/${deleteId}`);
+            await api.delete(`/aplication/deleteClient/${deleteId}`);
             setShowDeleteConfirm(false);
             fetchClients();
             toast.success('Klijent je uspješno obrisan!');

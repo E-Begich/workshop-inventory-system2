@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Modal, Button, Form, Table, InputGroup, FormControl } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
 
 const ShowService = () => {
     const [selectedServiceId, setSelectedServiceId] = useState(null);
@@ -43,7 +43,7 @@ const ShowService = () => {
 
     const fetchService = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllService');
+            const res = await api.get('/aplication/getAllService');
             setService(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju usluga', error);
@@ -58,7 +58,7 @@ const ShowService = () => {
         };
 
         try {
-            await axios.post('/api/aplication/addService', serviceData);
+            await api.post('/aplication/addService', serviceData);
             setShowModal(false);
             fetchService();
             toast.success('Usluga je uspješno dodana!');
@@ -77,7 +77,7 @@ const ShowService = () => {
 
     const handleEditService = async () => {
         try {
-            await axios.put(`/api/aplication/updateService/${selectedServiceId}`, formData);
+            await api.put(`/aplication/updateService/${selectedServiceId}`, formData);
             setShowModal(false);
             fetchService();
             toast.success('Usluga je uspješno ažurirana!');
@@ -99,7 +99,7 @@ const ShowService = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`/api/aplication/deleteService/${deleteId}`);
+            await api.delete(`/aplication/deleteService/${deleteId}`);
             setShowDeleteConfirm(false);
             fetchService();
             toast.success('Usluga je uspješno obrisana!');

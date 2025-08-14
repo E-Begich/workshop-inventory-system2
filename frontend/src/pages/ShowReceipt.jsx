@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Modal, Button, Table, InputGroup, FormControl } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
-
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
 
 const ShowReceipt = () => {
     const [receipts, setReceipts] = useState([]);
@@ -25,7 +24,7 @@ const ShowReceipt = () => {
 
     const fetchReceipts = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllReceipt');
+            const res = await api.get('/aplication/getAllReceipt');
             setReceipts(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju računa:', error);
@@ -35,7 +34,7 @@ const ShowReceipt = () => {
 
     const fetchClients = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllClients');
+            const res = await api.get('/aplication/getAllClients');
             setClients(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju klijenata', error);
@@ -44,7 +43,7 @@ const ShowReceipt = () => {
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllUsers');
+            const res = await api.get('/aplication/getAllUsers');
             setUsers(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju korisnika', error);
@@ -71,7 +70,7 @@ const ShowReceipt = () => {
 
     const openDetailsModal = async (id) => {
         try {
-            const res = await axios.get(`/api/aplication/getReceiptWithDetails/${id}`);
+            const res = await api.get(`/aplication/getReceiptWithDetails/${id}`);
             setDetailedReceipt(res.data);
             setDetailsModalVisible(true);
         } catch (error) {
@@ -285,7 +284,7 @@ const ShowReceipt = () => {
                     {detailedReceipt && (
                         <Button
                             variant="danger"
-                            onClick={() => window.open(`${apiUrl}/api/aplication/generateReceiptPDF/${detailedReceipt.ID_receipt}`, '_blank')}
+                            onClick={() => window.open(`${apiUrl}/aplication/generateReceiptPDF/${detailedReceipt.ID_receipt}`, '_blank')}
                         >
                             📄 Preuzmi PDF
                         </Button>

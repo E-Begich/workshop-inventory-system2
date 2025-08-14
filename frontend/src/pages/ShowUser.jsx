@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Modal, Button, Form, Table } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
 
 const ShowUser = () => {
     const [selectedUserId, setSelectedUserId] = useState(null);
@@ -31,9 +31,10 @@ const ShowUser = () => {
         fetchRole();
     }, []);
 
+
     const fetchUsers = async () => {
         try {
-            const res = await axios.get('/api/aplication/getAllUsers');
+            const res = await api.get('/aplication/getAllUsers');
             setUsers(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju korisnika', error);
@@ -42,7 +43,7 @@ const ShowUser = () => {
 
     const fetchRole = async () => {
         try {
-            const res = await axios.get('/api/aplication/getRoleEnum');
+            const res = await api.get('/aplication/getRoleEnum');
             setRole(res.data);
         } catch (error) {
             console.error('Greška pri dohvaćanju uloge', error);
@@ -60,7 +61,7 @@ const ShowUser = () => {
             return;
         }
         try {
-            await axios.post('/api/aplication/addUser', formData);
+            await api.post('/aplication/addUser', formData);
             setShowModal(false);
             fetchUsers();
             toast.success('Korisnik uspješno dodan!');
@@ -84,7 +85,7 @@ const ShowUser = () => {
             return;
         }
         try {
-            await axios.put(`/api/aplication/updateUser/${selectedUserId}`, formData);
+            await api.put(`/aplication/updateUser/${selectedUserId}`, formData);
             setShowModal(false);
             fetchUsers();
             toast.success('Korisnik ažuriran!');
@@ -106,7 +107,7 @@ const ShowUser = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`/api/aplication/deleteUser/${deleteId}`);
+            await api.delete(`/aplication/deleteUser/${deleteId}`);
             setShowDeleteConfirm(false);
             fetchUsers();
             toast.success('Korisnik je uspješno obrisan!');

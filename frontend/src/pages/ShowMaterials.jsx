@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Modal, Button, Form, Table, InputGroup, FormControl } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/api';
 
 
 const ShowMaterials = () => {
@@ -45,7 +45,7 @@ const ShowMaterials = () => {
 
   const fetchMaterials = async () => {
     try {
-      const res = await axios.get('/api/aplication/getAllMaterial');
+      const res = await api.get('/aplication/getAllMaterial');
       setMaterials(res.data);
     } catch (error) {
       console.error('Greška pri dohvaćanju dobavljača', error);
@@ -54,7 +54,7 @@ const ShowMaterials = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const res = await axios.get('/api/aplication/getAllSupplier');
+      const res = await api.get('/aplication/getAllSupplier');
       setSuppliers(res.data);
     } catch (error) {
       console.error('Greška pri dohvaćanju dobavljača', error);
@@ -63,7 +63,7 @@ const ShowMaterials = () => {
 
   const fetchLocation = async () => {
     try {
-      const res = await axios.get('/api/aplication/getLocationEnum');
+      const res = await api.get('/aplication/getLocationEnum');
       setLocation(res.data);
     } catch (error) {
       console.error('Greška pri dohvaćanju Lokacije', error);
@@ -72,7 +72,7 @@ const ShowMaterials = () => {
 
   const fetchUnit = async () => {
     try {
-      const res = await axios.get('/api/aplication/getUnitEnum');
+      const res = await api.get('/aplication/getUnitEnum');
       setUnit(res.data);
     } catch (error) {
       console.error('Greška pri dohvaćanju Lokacije', error);
@@ -81,7 +81,7 @@ const ShowMaterials = () => {
 
   const fetchTypeChange = async () => {
     try {
-      const res = await axios.get('/api/aplication/getTypeChangeEnum');
+      const res = await api.get('/aplication/getTypeChangeEnum');
       setTypeChange(res.data);
     } catch (error) {
       console.error('Greška pri dohvaćanju Lokacije', error);
@@ -97,7 +97,7 @@ const ShowMaterials = () => {
 
   const handleAddMaterial = async () => {
     try {
-      await axios.post('/api/aplication/addMaterial', formData);
+      await api.post('/aplication/addMaterial', formData);
       setShowModal(false);
       fetchMaterials();
       toast.success('Materijal uspješno dodan!');
@@ -123,7 +123,7 @@ const ShowMaterials = () => {
 
   const handleEditMaterial = async () => {
     try {
-      await axios.put(`/api/aplication/updateMaterial/${selectedMaterialId}`, formData);
+      await api.put(`/aplication/updateMaterial/${selectedMaterialId}`, formData);
       setShowModal(false);
       fetchMaterials();
       toast.success('Materijal uspješno ažuriran!');
@@ -151,7 +151,7 @@ const ShowMaterials = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/api/aplication/deleteMaterial/${deleteId}`);
+      await api.delete(`/aplication/deleteMaterial/${deleteId}`);
       setShowDeleteConfirm(false);
       fetchMaterials();
       toast.success('Materijal uspješno obrisan!');
