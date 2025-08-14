@@ -188,6 +188,7 @@ const getPaymentEnum = (req, res) => {
   const paymentEnum = Receipt.rawAttributes.PaymentMethod.values;
   res.status(200).json(paymentEnum);
 };
+
 const getReceiptWithDetails = async (req, res) => {
   const ID_receipt = req.params.ID_receipt;
 

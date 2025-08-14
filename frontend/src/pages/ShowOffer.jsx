@@ -265,7 +265,7 @@ const ShowOffer = () => {
                                     <td style={{ whiteSpace: 'nowrap' }}>
                                         <Button variant="secondary" size="sm" className="me-2" onClick={() => openDetailsModal(offer.ID_offer)}> Otvori </Button>
                                         <Button variant="danger" size="sm" className="me-2" disabled={offer.HasReceipt} onClick={() => handleCreateReceipt(offer.ID_offer)}> {offer.HasReceipt ? 'Račun kreiran' : 'Kreiraj račun'}</Button>                          
-                                        <Button variant="danger" size="sm" className="me-2" onClick={() => window.open(`${apiUrl}/api/aplication/generateOfferPDF/${offer.ID_offer}`, '_blank')}> Izvezi PDF </Button>
+                                        <Button variant="danger" size="sm" className="me-2" onClick={() => window.open(`${apiUrl}/api/aplication/generateOfferPDF/${offer.ID_offer}`, '_blank')}> Preuzmi PDF </Button>
                                         <Button variant="danger" size="sm" className="me-2" onClick={() => confirmDeleteOffer(offer.ID_offer)}> X </Button>
                                     </td>
                                 </tr>

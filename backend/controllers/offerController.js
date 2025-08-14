@@ -15,23 +15,36 @@ const WarehouseChange = db.WarehouseChange
 
 //1. create offer
 const addOffer = async (req, res) => {
+    try {
+        const {
+            ID_client,
+            ID_user,
+            DateCreate,
+            DateEnd,
+            PriceNoTax,
+            Tax,
+            PriceTax
+        } = req.body;
 
-    let info = {
-        ID_offer: req.body.ID_offer,
-        ID_client: req.body.ID_client,
-        DateCreate: req.body.DateCreate,
-        DateEnd: req.body.DateEnd,
-        PriceNoTax: req.body.PriceNoTax,
-        Tax: req.body.Tax,
-        PriceTax: req.body.PriceTax,
-        ID_user: req.body.ID_user,
-        HasReceipt: req.body.HasReceipt,
+        // Parsiramo vrijednosti u odgovarajuće tipove
+        const newOffer = await Offer.create({
+            ID_client: parseInt(ID_client),
+            ID_user: parseInt(ID_user),
+            DateCreate, // očekuje format 'YYYY-MM-DD'
+            DateEnd,    // očekuje format 'YYYY-MM-DD'
+            PriceNoTax: parseFloat(PriceNoTax),
+            Tax: parseFloat(Tax),
+            PriceTax: parseFloat(PriceTax),
+            HasReceipt: false
+        });
+
+        res.status(201).json(newOffer);
+
+    } catch (error) {
+        console.error('Error creating offer:', error);
+        res.status(500).json({ message: 'Nešto je pošlo po zlu prilikom kreiranja ponude', error: error.message });
     }
-
-    const offer = await Offer.create(info)
-    res.status(200).send(offer)
-    console.log(offer)
-}
+};
 
 // 2. Gets all users from table
 const getAllOffer = async (req, res) => {
@@ -82,6 +95,55 @@ const getOfferWithDetails = async (req, res) => {
         res.status(500).send('Greška na serveru');
     }
 };
+
+const createOfferWithItems = async (req, res) => {
+  const {
+    ID_client,
+    DateCreate,
+    DateEnd,
+    PriceNoTax,
+    Tax,
+    PriceTax,
+    ID_user,
+    OfferItems: items // array stavki
+  } = req.body;
+
+  const t = await sequelize.transaction(); // pokrećemo transakciju
+
+  try {
+    // 1. Kreiraj ponudu
+    const offer = await Offer.create({
+      ID_client,
+      DateCreate,
+      DateEnd,
+      PriceNoTax,
+      Tax,
+      PriceTax,
+      ID_user,
+      HasReceipt: false
+    }, { transaction: t });
+
+    // 2. Dodaj stavke, povezujući ih s kreiranom ponudom
+    for (let item of items) {
+      await OfferItems.create({
+        ID_offer: offer.ID_offer,
+        Description: item.Description,
+        Quantity: item.Quantity,
+        Price: item.Price
+      }, { transaction: t });
+    }
+
+    // 3. Commit transakcije
+    await t.commit();
+
+    res.status(201).json({ message: 'Ponuda i stavke su uspješno kreirani', offer });
+  } catch (error) {
+    await t.rollback(); // rollback ako nešto ne radi
+    console.error(error);
+    res.status(500).json({ message: 'Greška pri kreiranju ponude', error: error.message });
+  }
+};
+
 
 
 //forma za kreiranje i izgled PDF dokumenta
@@ -216,7 +278,7 @@ const generateOfferPDF = async (req, res) => {
             const unitPriceNoTax = item.PriceNoTax;
             const unitPriceWithTax = item.PriceTax;
             const pdvPercent = item.Tax; // expected to be something like 25
-            const pdvAmount = (unitPriceWithTax - unitPriceNoTax) ;
+            const pdvAmount = (unitPriceWithTax - unitPriceNoTax);
 
             const row = [
                 naziv,
@@ -287,5 +349,6 @@ module.exports = {
     updateOffer,
     deleteOffer,
     generateOfferPDF,
-    getOfferWithDetails
+    getOfferWithDetails,
+    createOfferWithItems
 }
