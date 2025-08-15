@@ -97,54 +97,76 @@ const getOfferWithDetails = async (req, res) => {
 };
 
 const createOfferWithItems = async (req, res) => {
-  const {
-    ID_client,
-    DateCreate,
-    DateEnd,
-    PriceNoTax,
-    Tax,
-    PriceTax,
-    ID_user,
-    OfferItems: items // array stavki
-  } = req.body;
+    const {
+        ID_client,
+        DateCreate,
+        DateEnd,
+        PriceNoTax,
+        Tax,
+        PriceTax,
+        ID_user,
+        OfferItems: items // array stavki
+    } = req.body;
 
-  const t = await sequelize.transaction(); // pokrećemo transakciju
+    const t = await sequelize.transaction(); // pokrećemo transakciju
 
-  try {
-    // 1. Kreiraj ponudu
-    const offer = await Offer.create({
-      ID_client,
-      DateCreate,
-      DateEnd,
-      PriceNoTax,
-      Tax,
-      PriceTax,
-      ID_user,
-      HasReceipt: false
-    }, { transaction: t });
+    try {
+        // 1. Kreiraj ponudu
+        const offer = await Offer.create({
+            ID_client,
+            DateCreate,
+            DateEnd,
+            PriceNoTax,
+            Tax,
+            PriceTax,
+            ID_user,
+            HasReceipt: false
+        }, { transaction: t });
 
-    // 2. Dodaj stavke, povezujući ih s kreiranom ponudom
-    for (let item of items) {
-      await OfferItems.create({
-        ID_offer: offer.ID_offer,
-        Description: item.Description,
-        Quantity: item.Quantity,
-        Price: item.Price
-      }, { transaction: t });
+        // 2. Dodaj stavke, povezujući ih s kreiranom ponudom
+        for (let item of items) {
+            await OfferItems.create({
+                ID_offer: offer.ID_offer,
+                Description: item.Description,
+                Quantity: item.Quantity,
+                Price: item.Price
+            }, { transaction: t });
+        }
+
+        // 3. Commit transakcije
+        await t.commit();
+
+        res.status(201).json({ message: 'Ponuda i stavke su uspješno kreirani', offer });
+    } catch (error) {
+        await t.rollback(); // rollback ako nešto ne radi
+        console.error(error);
+        res.status(500).json({ message: 'Greška pri kreiranju ponude', error: error.message });
     }
-
-    // 3. Commit transakcije
-    await t.commit();
-
-    res.status(201).json({ message: 'Ponuda i stavke su uspješno kreirani', offer });
-  } catch (error) {
-    await t.rollback(); // rollback ako nešto ne radi
-    console.error(error);
-    res.status(500).json({ message: 'Greška pri kreiranju ponude', error: error.message });
-  }
 };
 
+function generateHUB3QR({ amount, recipientName, recipientAddress, recipientCity, iban, description, reference }) {
+    function formatAmount(amount) {
+        return parseFloat(amount).toFixed(2).padStart(15, '0'); // npr. 00000000123.45
+    }
 
+    const hub3Data = [
+        'HRVHUB30',                // Format
+        'HRK',                     // Valuta
+        formatAmount(amount),      // Iznos
+        recipientName || '',       // Primatelj
+        recipientAddress || '',    // Adresa primatelja
+        recipientCity || '',       // Grad primatelja
+        '',                        // Platitelj
+        '',                        // Adresa platitelja
+        '',                        // Grad platitelja
+        iban || '',                // IBAN
+        description || '',         // Opis
+        reference || '',           // Poziv na broj
+        '',                        // Datum valute
+    ];
+
+    return hub3Data.join('\n');
+}
 
 //forma za kreiranje i izgled PDF dokumenta
 const PDFDocument = require('pdfkit');
@@ -291,38 +313,39 @@ const generateOfferPDF = async (req, res) => {
                 formatCurrency(unitPriceWithTax),
             ];
 
-let maxRowHeight = 0;
+            let maxRowHeight = 0;
 
-  row.forEach((text, i) => {
-    const cellX = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-    const cellWidth = colWidths[i];
+            row.forEach((text, i) => {
+                const cellX = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+                const cellWidth = colWidths[i];
 
-    // izračun stvarne visine teksta u toj koloni
-    const textHeight = doc.heightOfString(String(text), {
-      width: cellWidth,
-      align: 'left'
-    });
-    if (textHeight > maxRowHeight) {
-      maxRowHeight = textHeight;
-    }
+                // izračun stvarne visine teksta u toj koloni
+                const textHeight = doc.heightOfString(String(text), {
+                    width: cellWidth,
+                    align: 'left'
+                });
+                if (textHeight > maxRowHeight) {
+                    maxRowHeight = textHeight;
+                }
 
-    doc
-      .font('DejaVu')
-      .fontSize(10)
-      .text(String(text), cellX, rowY, {
-        width: cellWidth,
-        align: 'left'
-      });
-  });
+                doc
+                    .font('DejaVu')
+                    .fontSize(10)
+                    .text(String(text), cellX, rowY, {
+                        width: cellWidth,
+                        align: 'left'
+                    });
+            });
 
-  // dodaj malo razmaka nakon reda
-  rowY += maxRowHeight + 5;
-    }
+            // dodaj malo razmaka nakon reda
+            rowY += maxRowHeight + 5;
+        }
 
         // === Sažetak cijena ===
         doc.moveDown(5);
 
         const rightAlignX = 350;
+        const leftAlignX = 50;
 
         doc
             .fontSize(12)
@@ -332,18 +355,40 @@ let maxRowHeight = 0;
             .moveDown(0.2)
             .text(`Ukupno s PDV-om:      ${formatCurrency(parseFloat(offer.PriceTax))}`, rightAlignX);
 
+        // === Tekst iznad QR koda ===
+        doc.moveDown(1);
+        doc.font('DejaVu')
+            .fontSize(10)
+            .text('Ponudu možete uplatiti i skeniranjem ovog QR koda:', 50);
+
+        // === QR kod (HUB3 format za plaćanje) ===
+        const QRCode = require('qrcode');
+
+        const qrData = generateHUB3QR({
+            amount: offer.PriceTax,
+            recipientName: 'Moja Firma d.o.o.',
+            recipientAddress: 'Adresa 1',
+            recipientCity: '10000 Zagreb',
+            iban: 'HR1234567890123456789',
+            description: `Račun ${offer.ID_offer}`,
+            reference: `HR00${offer.ID_offer}` // ili tvoj model/poziv na broj
+        });
+
+        const qrImage = await QRCode.toDataURL(qrData);
+        const base64Data = qrImage.replace(/^data:image\/png;base64,/, "");
+        const qrBuffer = Buffer.from(base64Data, 'base64');
+        doc.image(qrBuffer, 50, doc.y + 20, { width: 100 });
 
 
-        doc.moveDown(3);
+        // Postavi QR kod i zapamti donji rub QR-a
+        const qrY = doc.y + 20;
+        doc.image(qrBuffer, leftAlignX, qrY, { width: 100 });
 
-        // === Potpis ===
-        const leftAlignX = 50;
-
-        doc.moveDown(2);
-
+        // --- Potpis ispod QR-a ---
+        const signatureY = qrY + 120; // 100 širina QR-a + 20 px razmak
         doc
-            .font('DejaVu') // <-- ovo dodaj
-            .text('______________________', leftAlignX)
+            .font('DejaVu')
+            .text('______________________', leftAlignX, signatureY)
             .text(`${offer.User?.Name || ''} ${offer.User?.Lastname || ''}`, leftAlignX)
             .text(`${formatDate(new Date())}`, leftAlignX);
 

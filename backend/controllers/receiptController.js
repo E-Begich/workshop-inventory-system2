@@ -341,36 +341,36 @@ const generateReceiptPDF = async (req, res) => {
         formatCurrency(item.PriceTax),
       ];
 
-  let maxRowHeight = 0;
+      let maxRowHeight = 0;
 
-  row.forEach((text, i) => {
-    const cellX = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-    const cellWidth = colWidths[i];
+      row.forEach((text, i) => {
+        const cellX = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+        const cellWidth = colWidths[i];
 
-    // izračun stvarne visine teksta u toj koloni
-    const textHeight = doc.heightOfString(String(text), {
-      width: cellWidth,
-      align: 'left'
-    });
-    if (textHeight > maxRowHeight) {
-      maxRowHeight = textHeight;
-    }
+        // izračun stvarne visine teksta u toj koloni
+        const textHeight = doc.heightOfString(String(text), {
+          width: cellWidth,
+          align: 'left'
+        });
+        if (textHeight > maxRowHeight) {
+          maxRowHeight = textHeight;
+        }
 
-    doc
-      .font('DejaVu')
-      .fontSize(10)
-      .text(String(text), cellX, rowY, {
-        width: cellWidth,
-        align: 'left'
+        doc
+          .font('DejaVu')
+          .fontSize(10)
+          .text(String(text), cellX, rowY, {
+            width: cellWidth,
+            align: 'left'
+          });
       });
-  });
 
-  // dodaj malo razmaka nakon reda
-  rowY += maxRowHeight + 5;
+      // dodaj malo razmaka nakon reda
+      rowY += maxRowHeight + 5;
     }
-    
+
     // === Sažetak ===
-    doc.moveDown(5);
+    doc.moveDown(3);
 
     const rightAlignX = 350;
     doc
@@ -381,13 +381,26 @@ const generateReceiptPDF = async (req, res) => {
       .moveDown(0.2)
       .text(`Ukupno s PDV-om:      ${formatCurrency(receipt.PriceTax)}`, rightAlignX);
 
-    // === QR kod (opcija) ===
-    const QRCode = require('qrcode');
-    const qrData = `Racun ${receipt.ID_receipt} | Iznos: ${formatCurrency(receipt.PriceTax)}`;
+    // === Simulirani QR kod za testiranje (nije fiskalizacija) ===
+    const simulatedEOR = 'TEST-EOR-123456';
+    const simulatedZOI = 'TEST-ZOI-654321';
+    const qrData = `https://tvoj-projekt.hr/provjera-racuna?jir=${simulatedEOR}&zki=${simulatedZOI}`;
+
+    // Generiranje QR koda
     const qrImage = await QRCode.toDataURL(qrData);
     const base64Data = qrImage.replace(/^data:image\/png;base64,/, "");
     const qrBuffer = Buffer.from(base64Data, 'base64');
-    doc.image(qrBuffer, 50, doc.y + 20, { width: 100 });
+
+    // Tekst iznad QR koda
+    doc
+      .font('DejaVu')
+      .fontSize(10)
+      .text(`EOR: ${simulatedEOR}`, 50, doc.y + 10)
+      .text(`ZOI: ${simulatedZOI}`, 50)
+      .text('Račun možete provjeriti i preko QR koda (simulacija)', 50, doc.y + 10);
+
+    // Ubacivanje QR koda u PDF
+    doc.image(qrBuffer, 50, doc.y + 5, { width: 100 });
 
     // === Potpis ===
     doc.moveDown(12);
