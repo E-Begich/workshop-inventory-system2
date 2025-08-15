@@ -174,8 +174,6 @@ const ShowOffer = () => {
     const currentOffers = filteredOffers.slice(indexOfFirst, indexOfLast);
     const totalPages = Math.ceil(filteredOffers.length / offersPerPage);
 
-    const apiUrl = process.env.REACT_APP_API_URL;
-
     return (
         <div className="container px-3 mt-4">
             <div className="row align-items-center mb-3">

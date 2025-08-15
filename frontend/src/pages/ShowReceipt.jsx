@@ -224,7 +224,7 @@ const ShowReceipt = () => {
                                                 }
                                             }}
                                         >
-                                            📄 Prikaži PDF
+                                         Prikaži PDF
                                         </Button>
 
                                     </td>
@@ -317,7 +317,7 @@ const ShowReceipt = () => {
                             variant="danger"
                             onClick={() => window.open(`${apiUrl}/aplication/generateReceiptPDF/${detailedReceipt.ID_receipt}`, '_blank')}
                         >
-                            📄 Preuzmi PDF
+                            Prikaži PDF
                         </Button>
                     )}
                     <Button variant="secondary" onClick={() => setDetailsModalVisible(false)}>

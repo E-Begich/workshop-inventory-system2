@@ -31,6 +31,9 @@ const TopNavBar = () => {
           <Dropdown show={showDropdown} onToggle={() => setShowDropdown(!showDropdown)} align="end">
             <Dropdown.Menu>
               <Dropdown.Item className="d-flex align-items-center">
+                <span className="me-2 text-muted">{user.Name} {user.Lastname}</span>
+              </Dropdown.Item>
+              <Dropdown.Item className="d-flex align-items-center">
                 <FaBell className="me-2" />
                 Notifications
                 <Badge bg="danger" pill className="ms-auto">3+</Badge>
