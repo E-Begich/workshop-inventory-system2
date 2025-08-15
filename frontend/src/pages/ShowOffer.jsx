@@ -5,45 +5,37 @@ import { Link } from "react-router-dom";
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../api/api';
 
-
 const ShowOffer = () => {
     const [offers, setOffers] = useState([]);
-    const [client, setClient] = useState([]);
+    const [clients, setClients] = useState([]);
     const [users, setUsers] = useState([]);
     const [searchName, setSearchName] = useState('');
     const [searchUser, setSearchUser] = useState('');
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); //za modal za brisanje
-    const [deleteId, setDeleteId] = useState(null);//za modal za brisanje
-    const [selectedOffer] = useState(null); //odabir ponude za odabir plaćanja
-    const [showModal, setShowModal] = useState(false); //postavljanje načina plaćanja
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);//modal za brisanje
+    const [deleteId, setDeleteId] = useState(null);//modal za brisanje
+    const [selectedOffer, setSelectedOffer] = useState(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);//modal za odabir plaćanja
     const [paymentMethod, setPaymentMethod] = useState('');
-
-    const [detailsModalVisible, setDetailsModalVisible] = useState(false); //za otvaranje modala za pregled ponude
+    const [detailsModalVisible, setDetailsModalVisible] = useState(false);//modal za pregled ponude
     const [detailedOffer, setDetailedOffer] = useState(null);
-
-    const [, setIsCreatingReceipt] = useState(false);
-
-    const [payment, setPayment] = useState([]);
+    const [payments, setPayments] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
     const [currentPage, setCurrentPage] = useState(1);
     const offersPerPage = 30;
-
 
     useEffect(() => {
         fetchOffers();
         fetchClients();
         fetchUsers();
-        fetchPayment();
+        fetchPayments();
     }, []);
 
-
-    // Dohvati sve ponude
     const fetchOffers = async () => {
         try {
             const res = await api.get('/aplication/getAllOffer');
             setOffers(res.data);
         } catch (error) {
-            console.error('Greška pri dohvaćanju ponuda:', error);
+            console.error(error);
             toast.error('Ne mogu dohvatiti ponude.');
         }
     };
@@ -51,9 +43,9 @@ const ShowOffer = () => {
     const fetchClients = async () => {
         try {
             const res = await api.get('/aplication/getAllClients');
-            setClient(res.data);
+            setClients(res.data);
         } catch (error) {
-            console.error('Greška pri dohvaćanju dobavljača', error);
+            console.error(error);
         }
     };
 
@@ -62,42 +54,29 @@ const ShowOffer = () => {
             const res = await api.get('/aplication/getAllUsers');
             setUsers(res.data);
         } catch (error) {
-            console.error('Greška pri dohvaćanju korisnika', error);
+            console.error(error);
         }
     };
 
-    const getClientType = (id) => {
-        const foundClient = client.find(s => s.ID_client === id);
-        return foundClient ? foundClient.TypeClient : 'Nepoznato';
-    };
-
-    const getClientName = (id) => {
-        const foundClient = client.find(c => c.ID_client === id);
-        if (!foundClient) return 'Nepoznato';
-        return foundClient.TypeClient === 'Tvrtka' ? foundClient.Name : foundClient.ContactName;
-    };
-
-    const getUserName = (id) => {
-        const user = users.find(u => u.ID_user === id);
-        return user ? user.Name : 'Nepoznat';
-    };
-
-    const fetchPayment = async () => {
+    const fetchPayments = async () => {
         try {
             const res = await api.get('/aplication/getPaymentEnum');
-            setPayment(res.data);
+            setPayments(res.data);
         } catch (error) {
-            console.error('Greška pri dohvaćanju načina plaćanja', error);
+            console.error(error);
         }
     };
 
-    //postavljanje datuma u dd.mm.yy
+    const getClientType = (id) => clients.find(c => c.ID_client === id)?.TypeClient || 'Nepoznato';
+    const getClientName = (id) => {
+        const c = clients.find(c => c.ID_client === id);
+        if (!c) return 'Nepoznato';
+        return c.TypeClient === 'Tvrtka' ? c.Name : c.ContactName;
+    };
+    const getUserName = (id) => users.find(u => u.ID_user === id)?.Name || 'Nepoznat';
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');     // dd
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // mm
-        const year = date.getFullYear();     // yy (zadnje 2 znamenke godine)
-        return `${day}.${month}.${year}`;
+        const d = new Date(dateString);
+        return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
     };
 
     const confirmDeleteOffer = (id) => {
@@ -111,32 +90,11 @@ const ShowOffer = () => {
             toast.success('Ponuda obrisana.');
             fetchOffers();
         } catch (error) {
-            console.error('Greška pri brisanju:', error);
+            console.error(error);
             toast.error('Brisanje ponude nije uspjelo.');
         } finally {
             setShowDeleteConfirm(false);
             setDeleteId(null);
-        }
-    };
-
-    const handleCreateReceipt = async () => {
-        //console.log("Odabrani način plaćanja:", paymentMethod);  // provjeri vrijednost
-        setIsCreatingReceipt(true);
-        try {
-            await api.post('/aplication/createReceiptFromOffer', {
-                ID_offer: selectedOffer.ID_offer,
-                ID_user: selectedOffer.ID_user, // ako uzimaš iz ponude
-                PaymentMethod: paymentMethod
-            });
-            toast.success("Račun uspješno kreiran.");
-            setShowModal(false);
-            setPaymentMethod(''); // resetira odabir
-            fetchOffers(); // refresha podatke da osvježiš HasReceipt
-        } catch (error) {
-            //  console.error("Greška prilikom kreiranja računa:", error);
-            toast.error("Greška prilikom kreiranja računa.");
-        } finally {
-            setIsCreatingReceipt(false);
         }
     };
 
@@ -146,20 +104,60 @@ const ShowOffer = () => {
             setDetailedOffer(res.data);
             setDetailsModalVisible(true);
         } catch (error) {
-            console.error('Greška pri dohvaćanju detalja ponude:', error);
+            console.error(error);
             toast.error('Ne mogu dohvatiti detalje ponude.');
         }
     };
 
-    const filteredOffers = offers.filter((offer) => {
-        const clientName = getClientName(offer.ID_client).toLowerCase();
-        const userName = getUserName(offer.ID_user).toLowerCase();
+    const handleCreateReceipt = async (offer) => {
+        if (!offer || !paymentMethod) {
+            toast.error('Odaberite ponudu i način plaćanja.');
+            return;
+        }
+        try {
+            await api.post('/aplication/createReceiptFromOffer', {
+                ID_offer: offer.ID_offer,
+                ID_user: offer.ID_user,
+                PaymentMethod: paymentMethod
+            });
+            toast.success('Račun uspješno kreiran.');
+            setShowPaymentModal(false);
+            setPaymentMethod('');
+            fetchOffers();
+        } catch (error) {
+            console.error(error);
+            toast.error('Greška pri kreiranju računa.');
+        }
+    };
 
-        return (
-            clientName.includes(searchName.toLowerCase()) &&
-            userName.includes(searchUser.toLowerCase())
-        );
-    });
+    const openPDF = async (offerId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await api.get(`/aplication/generateOfferPDF/${offerId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                responseType: 'blob'
+            });
+
+            const fileURL = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            window.open(fileURL, '_blank'); // Otvori PDF u novom tabu
+        } catch (error) {
+            console.error('Greška prilikom otvaranja PDF-a:', error);
+            toast.error('Neuspješno otvaranje PDF-a');
+        }
+    };
+
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
+        setSortConfig({ key, direction });
+    };
+
+    const filteredOffers = offers.filter(o =>
+        getClientName(o.ID_client).toLowerCase().includes(searchName.toLowerCase()) &&
+        getUserName(o.ID_user).toLowerCase().includes(searchUser.toLowerCase())
+    );
 
     if (sortConfig.key) {
         filteredOffers.sort((a, b) => {
@@ -176,57 +174,35 @@ const ShowOffer = () => {
     const currentOffers = filteredOffers.slice(indexOfFirst, indexOfLast);
     const totalPages = Math.ceil(filteredOffers.length / offersPerPage);
 
-    const handleSort = (key) => {
-        let direction = 'asc';
-        if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({ key, direction });
-    };
-
     const apiUrl = process.env.REACT_APP_API_URL;
 
     return (
         <div className="container px-3 mt-4">
-            {/* Naslov i gumb */}
             <div className="row align-items-center mb-3">
-                <div className="col-12 col-md">
-                    <h2 className="mb-0">Prikaz svih ponuda</h2>
-                </div>
-                <div className="col-12 col-md-auto mt-2 mt-md-0 text-md-end">
-                    <Button variant="danger" style={{ whiteSpace: 'nowrap' }}>
-                        <Link to="/addOffer" className="nav-link text-white">
-                            Dodaj novu ponudu
-                        </Link>
+                <div className="col-12 col-md"><h2>Prikaz svih ponuda</h2></div>
+                <div className="col-12 col-md-auto text-md-end">
+                    <Button variant="danger">
+                        <Link to="/addOffer" className="nav-link text-white">Dodaj novu ponudu</Link>
                     </Button>
                 </div>
             </div>
-            {/* Filteri (pretraga) */}
+
             <div className="row g-3 mb-3">
                 <div className="col-12 col-md-6 col-lg-4">
                     <InputGroup>
-                        <FormControl
-                            placeholder="Pretraga po nazivu"
-                            value={searchName}
-                            onChange={(e) => setSearchName(e.target.value)}
-                        />
+                        <FormControl placeholder="Pretraga po nazivu" value={searchName} onChange={e => setSearchName(e.target.value)} />
                     </InputGroup>
                 </div>
                 <div className="col-12 col-md-6 col-lg-4">
                     <InputGroup>
-                        <FormControl
-                            placeholder="Pretraga po kreatoru"
-                            value={searchUser}
-                            onChange={(e) => setSearchUser(e.target.value)}
-                        />
+                        <FormControl placeholder="Pretraga po kreatoru" value={searchUser} onChange={e => setSearchUser(e.target.value)} />
                     </InputGroup>
                 </div>
             </div>
-            {currentOffers.length === 0 ? (
-                <p>Nema ponuda.</p>
-            ) : (
+
+            {currentOffers.length === 0 ? <p>Nema ponuda.</p> : (
                 <div className="table-responsive">
-                    <Table striped bordered hover size="sm" className="mb-3">
+                    <Table striped bordered hover size="sm">
                         <thead>
                             <tr>
                                 {[
@@ -238,14 +214,9 @@ const ShowOffer = () => {
                                     { label: 'Cijena (s PDV)', key: 'PriceTax' },
                                     { label: 'Ponudu kreirao', key: 'User.Name' },
                                 ].map(({ label, key }) => (
-                                    <th key={key} onClick={() => handleSort(key)} style={{ cursor: 'pointer' }}>
-                                        {label}{' '}
-                                        <span style={{ color: sortConfig.key === key ? 'black' : '#ccc' }}>
-                                            {sortConfig.key === key
-                                                ? sortConfig.direction === 'asc'
-                                                    ? '▲'
-                                                    : '▼'
-                                                : '▲▼'}
+                                    <th key={key} style={{ cursor: 'pointer' }} onClick={() => handleSort(key)}>
+                                        {label} <span style={{ color: sortConfig.key === key ? 'black' : '#ccc' }}>
+                                            {sortConfig.key === key ? (sortConfig.direction === 'asc' ? '▲' : '▼') : '▲▼'}
                                         </span>
                                     </th>
                                 ))}
@@ -253,7 +224,7 @@ const ShowOffer = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredOffers.map((offer) => (
+                            {currentOffers.map(offer => (
                                 <tr key={offer.ID_offer}>
                                     <td>{offer.ID_offer}</td>
                                     <td>{getClientType(offer.ID_client)}</td>
@@ -263,10 +234,10 @@ const ShowOffer = () => {
                                     <td>{Number(offer.PriceTax).toFixed(2)} €</td>
                                     <td>{getUserName(offer.ID_user)}</td>
                                     <td style={{ whiteSpace: 'nowrap' }}>
-                                        <Button variant="secondary" size="sm" className="me-2" onClick={() => openDetailsModal(offer.ID_offer)}> Otvori </Button>
-                                        <Button variant="danger" size="sm" className="me-2" disabled={offer.HasReceipt} onClick={() => handleCreateReceipt(offer.ID_offer)}> {offer.HasReceipt ? 'Račun kreiran' : 'Kreiraj račun'}</Button>                          
-                                        <Button variant="danger" size="sm" className="me-2" onClick={() => window.open(`${apiUrl}/api/aplication/generateOfferPDF/${offer.ID_offer}`, '_blank')}> Preuzmi PDF </Button>
-                                        <Button variant="danger" size="sm" className="me-2" onClick={() => confirmDeleteOffer(offer.ID_offer)}> X </Button>
+                                        <Button size="sm" className="me-2" onClick={() => openDetailsModal(offer.ID_offer)}>Otvori</Button>
+                                        <Button size="sm" className="me-2" disabled={offer.HasReceipt} onClick={() => { setSelectedOffer(offer); setShowPaymentModal(true) }}>Kreiraj račun</Button>
+                                        <Button variant="danger" size="sm" className="me-2" onClick={() => openPDF(offer.ID_offer)}>  Preuzmi PDF </Button>
+                                        <Button size="sm" variant="danger" onClick={() => confirmDeleteOffer(offer.ID_offer)}>Obriši</Button>
                                     </td>
                                 </tr>
                             ))}
@@ -274,6 +245,7 @@ const ShowOffer = () => {
                     </Table>
                 </div>
             )}
+
             {/* PAGINATION */}
             <div className="row align-items-center mt-3 px-2">
                 <div className="col-12 col-md-6 mb-2 mb-md-0">
@@ -299,7 +271,8 @@ const ShowOffer = () => {
                     </Button>
                 </div>
             </div>
-            {/* MODAL ZA POTVRDU BRISANJA */}
+
+            {/* Delete Confirm Modal */}
             <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Potvrda brisanja</Modal.Title>
@@ -313,38 +286,22 @@ const ShowOffer = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* MODAL ZA dodavanje plaćanja */}
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Odaberi način plaćanja</Modal.Title>
-                </Modal.Header>
+            {/* Payment Modal */}
+            <Modal show={showPaymentModal} onHide={() => setShowPaymentModal(false)}>
+                <Modal.Header closeButton><Modal.Title>Odaberi način plaćanja</Modal.Title></Modal.Header>
                 <Modal.Body>
-                    <Form.Group>
-                        <Form.Label>Način plaćanja</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={paymentMethod}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                        >
-                            <option value="">Odaberi način plaćanja</option>
-                            {payment.map((method) => (
-                                <option key={method} value={method}>
-                                    {method}
-                                </option>
-                            ))}
-                        </Form.Control>
-                    </Form.Group>
+                    <Form.Select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+                        <option value="">Odaberite način plaćanja</option>
+                        {payments.map((p, idx) => <option key={idx} value={p}>{p}</option>)}
+                    </Form.Select>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Odustani
-                    </Button>
-                    <Button variant="danger" onClick={handleCreateReceipt} disabled={!paymentMethod}>
-                        Potvrdi
-                    </Button>
+                    <Button variant="secondary" onClick={() => setShowPaymentModal(false)}>Otkaži</Button>
+                    <Button variant="primary" onClick={() => handleCreateReceipt(selectedOffer)}>Kreiraj račun</Button>
                 </Modal.Footer>
             </Modal>
 
+            {/* Details Modal */}
             <Modal
                 show={detailsModalVisible}
                 onHide={() => setDetailsModalVisible(false)}
@@ -398,14 +355,7 @@ const ShowOffer = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     {detailedOffer && (
-                        <Button
-                            variant="danger"
-                            onClick={() =>
-                                window.open(`${apiUrl}/api/aplication/generateOfferPDF/${detailedOffer.ID_offer}`, '_blank')
-                            }
-                        >
-                            📄 Preuzmi PDF
-                        </Button>
+                        <Button variant="danger" className="me-2" onClick={() => openPDF(detailedOffer.ID_offer)}>  Preuzmi PDF </Button>
                     )}
                     <Button variant="secondary" onClick={() => setDetailsModalVisible(false)}>
                         Zatvori
@@ -414,9 +364,7 @@ const ShowOffer = () => {
             </Modal>
 
 
-
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />
-
         </div>
     );
 };

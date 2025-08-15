@@ -92,7 +92,7 @@ const createReceiptFromOffer = async (req, res) => {
   const currentYear = new Date().getFullYear();
 
   try {
-    // 1. Pronađi ponudu
+    // 1. Pronađi ponudu s stavkama
     const offer = await Offer.findOne({
       where: { ID_offer },
       include: [{ model: OfferItems, as: 'OfferItems' }],
@@ -102,9 +102,20 @@ const createReceiptFromOffer = async (req, res) => {
       return res.status(404).json({ error: 'Ponuda nije pronađena' });
     }
 
-    // 2. Izračun cijena
-    const priceNoTax = offer.OfferItems.reduce((sum, item) => sum + parseFloat(item.PriceNoTax), 0);
-    const priceTax = offer.OfferItems.reduce((sum, item) => sum + parseFloat(item.PriceTax), 0);
+    // provjera HasReceipt
+    if (offer.HasReceipt) {
+      return res.status(400).json({ error: 'Ova ponuda već ima kreiran račun' });
+    }
+
+    // 2. Izračun cijena (sigurno)
+    const priceNoTax = offer.OfferItems.reduce(
+      (sum, item) => sum + (parseFloat(item.PriceNoTax) || 0),
+      0
+    );
+    const priceTax = offer.OfferItems.reduce(
+      (sum, item) => sum + (parseFloat(item.PriceTax) || 0),
+      0
+    );
     const tax = priceTax - priceNoTax;
 
     // 3. Generiraj broj računa
@@ -118,21 +129,22 @@ const createReceiptFromOffer = async (req, res) => {
 
     let nextNumber = 1;
     if (latestReceipt && latestReceipt.ReceiptNumber) {
-      const lastNumber = parseInt(latestReceipt.ReceiptNumber.split('-')[2]);
-      nextNumber = lastNumber + 1;
+      const parts = latestReceipt.ReceiptNumber.split('-');
+      const lastNumber = parseInt(parts[2], 10);
+      if (!isNaN(lastNumber)) nextNumber = lastNumber + 1;
     }
 
     const receiptNumber = `R-${currentYear}-${String(nextNumber).padStart(5, '0')}`;
 
-    // 4. Pripremi stavke
+    // 4. Pripremi stavke računa (sigurno)
     const receiptItems = offer.OfferItems.map(item => ({
       TypeItem: item.TypeItem,
-      ID_material: item.ID_material,
-      ID_service: item.ID_service,
-      Amount: item.Amount,
-      PriceNoTax: item.PriceNoTax,
-      Tax: item.Tax,
-      PriceTax: item.PriceTax,
+      ID_material: item.ID_material || null,
+      ID_service: item.ID_service || null,
+      Amount: item.Amount || 0,
+      PriceNoTax: item.PriceNoTax || 0,
+      Tax: item.Tax || 0,
+      PriceTax: item.PriceTax || 0,
     }));
 
     // 5. Kreiraj račun
@@ -148,13 +160,10 @@ const createReceiptFromOffer = async (req, res) => {
       PaymentMethod
     });
 
-    // 5.1 Oznaci ponudu kao iskorištenu za račun
-    await Offer.update(
-      { HasReceipt: true },
-      { where: { ID_offer } }
-    );
+    // 6. Oznaci ponudu kao iskorištenu
+    await Offer.update({ HasReceipt: true }, { where: { ID_offer } });
 
-    // 6. Dodaj stavke i ažuriraj skladište
+    // 7. Dodaj stavke i ažuriraj skladište
     for (const item of receiptItems) {
       await ReceiptItems.create({
         ID_receipt: receipt.ID_receipt,
@@ -177,11 +186,14 @@ const createReceiptFromOffer = async (req, res) => {
     }
 
     res.status(201).json(receipt);
+
   } catch (error) {
-    console.error('Greška prilikom kreiranja računa iz ponude:', error);
+    console.error('Greška prilikom kreiranja računa iz ponude:', error.message);
+    console.error(error); // prikazuje full stack trace
     res.status(500).json({ error: 'Greška na serveru' });
   }
 };
+
 
 // 6. Get enum values for Type
 const getPaymentEnum = (req, res) => {
@@ -329,19 +341,34 @@ const generateReceiptPDF = async (req, res) => {
         formatCurrency(item.PriceTax),
       ];
 
-      row.forEach((text, i) => {
-        doc
-          .font('DejaVu')
-          .fontSize(10)
-          .text(text, startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0), rowY, {
-            width: colWidths[i],
-            align: 'left',
-          });
-      });
+  let maxRowHeight = 0;
 
-      rowY += rowSpacing;
+  row.forEach((text, i) => {
+    const cellX = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+    const cellWidth = colWidths[i];
+
+    // izračun stvarne visine teksta u toj koloni
+    const textHeight = doc.heightOfString(String(text), {
+      width: cellWidth,
+      align: 'left'
+    });
+    if (textHeight > maxRowHeight) {
+      maxRowHeight = textHeight;
     }
 
+    doc
+      .font('DejaVu')
+      .fontSize(10)
+      .text(String(text), cellX, rowY, {
+        width: cellWidth,
+        align: 'left'
+      });
+  });
+
+  // dodaj malo razmaka nakon reda
+  rowY += maxRowHeight + 5;
+    }
+    
     // === Sažetak ===
     doc.moveDown(5);
 

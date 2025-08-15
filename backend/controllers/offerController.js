@@ -291,18 +291,33 @@ const generateOfferPDF = async (req, res) => {
                 formatCurrency(unitPriceWithTax),
             ];
 
-            row.forEach((text, i) => {
-                doc
-                    .font('DejaVu')
-                    .fontSize(10)
-                    .text(text, startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0), rowY, {
-                        width: colWidths[i],
-                        align: 'left',
-                    });
-            });
+let maxRowHeight = 0;
 
-            rowY += rowSpacing; // make sure rowSpacing is defined above, e.g. const rowSpacing = 15;
-        }
+  row.forEach((text, i) => {
+    const cellX = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+    const cellWidth = colWidths[i];
+
+    // izračun stvarne visine teksta u toj koloni
+    const textHeight = doc.heightOfString(String(text), {
+      width: cellWidth,
+      align: 'left'
+    });
+    if (textHeight > maxRowHeight) {
+      maxRowHeight = textHeight;
+    }
+
+    doc
+      .font('DejaVu')
+      .fontSize(10)
+      .text(String(text), cellX, rowY, {
+        width: cellWidth,
+        align: 'left'
+      });
+  });
+
+  // dodaj malo razmaka nakon reda
+  rowY += maxRowHeight + 5;
+    }
 
         // === Sažetak cijena ===
         doc.moveDown(5);
