@@ -1,4 +1,5 @@
-const db = require('../models')
+const db = require('../models');
+const { logChange } = require('./warehouseChangeController');
 
 //creating main models
 const User = db.User
@@ -32,6 +33,18 @@ const addMaterial = async (req, res) => {
     };
 
     const material = await Materials.create(info);
+
+    // Logiranje kreiranja materijala
+    await logChange({
+      userId: req.user.ID_user,
+      actionType: 'dodano',
+      objectType: 'Materijal',
+      objectId: material.ID_material,
+      amount: material.Amount,
+      materialId: material.ID_material,
+      note: `Dodavanje materijala: ${material.NameMaterial}`
+    });
+
     res.status(200).send(material);
     console.log(material);
   } catch (error) {
@@ -57,18 +70,77 @@ const getOneMaterial = async (req, res) => {
 
 //4. update user over id
 const updateMaterial = async (req, res) => {
-  let ID_material = req.params.ID_material
-  const material = await Materials.update(req.body, { where: { ID_material: ID_material } })
-  res.status(200).send(material)
-}
+  const ID_material = req.params.ID_material;
+
+  try {
+    // Dohvati instancu materijala
+    const material = await Materials.findByPk(ID_material);
+
+    if (!material) {
+      return res.status(404).json({ message: 'Materijal nije pronađen.' });
+    }
+
+    // Ažuriraj podatke
+    await material.update(req.body);
+
+    // Logiranje promjene
+    await logChange({
+      userId: req.user.ID_user,
+      userName: req.user.Username,  // <- ako ti je ime korisnika u tokenu
+      actionType: 'ispravak',
+      objectType: 'Materijal',
+      objectId: material.ID_material,
+      materialId: material.ID_material,
+      materialName: material.NameMaterial, // <- ime umjesto samo ID
+      amount: material.Amount,
+      note: `Ažurirani podaci materijala: ${material.NameMaterial}`,
+    });
+
+    res.status(200).json(material);
+  } catch (error) {
+    console.error('Greška kod ažuriranja materijala:', error);
+    res.status(500).json({ message: 'Greška na serveru.' });
+  }
+};
 
 //5. delete user by id
-const deleteMaterial = async (req, res) => {
+//const deleteMaterial = async (req, res) => {
+//  let ID_material = req.params.ID_material
+//  await Materials.destroy({ where: { ID_material: ID_material } })
+//  res.send('Materijal je obrisan!')
+//}
 
-  let ID_material = req.params.ID_material
-  await Materials.destroy({ where: { ID_material: ID_material } })
-  res.send('Materijal je obrisan!')
-}
+const deleteMaterial = async (req, res) => {
+  const ID_material = req.params.ID_material;
+
+  try {
+    // Prvo provjerimo postoji li materijal
+    const material = await Materials.findByPk(ID_material);
+    if (!material) {
+      return res.status(404).json({ message: 'Materijal nije pronađen.' });
+    }
+
+    // Logiranje brisanja
+    await logChange({
+      userId: req.user.ID_user,
+      actionType: 'uklonjeno',
+      objectType: 'Materijal',
+      objectId: material.ID_material,
+      materialId: material.ID_material,
+      materialName: material.NameMaterial, // ovo se sprema u bazu
+      amount: -material.Amount,
+      note: `Materijal "${material.NameMaterial}" je obrisan`
+    });
+
+    // Brisanje materijala
+    await material.destroy();
+
+    res.status(200).json({ message: 'Materijal je obrisan!' });
+  } catch (error) {
+    console.error('Greška kod brisanja materijala:', error);
+    res.status(500).json({ message: 'Greška na serveru.' });
+  }
+};
 
 // 6. Get enum values for Location
 const getLocationEnum = (req, res) => {
@@ -91,37 +163,37 @@ const getTypeChangeEnum = (req, res) => {
 // 9. Ažuriraj količinu materijala (smanji na osnovu računa)
 // PUT /api/aplication/updateMaterialAmount/:ID_material
 const updateMaterialAmount = async (req, res) => {
-    const ID_material = req.params.ID_material;
-    const { Amount: usedAmount } = req.body;
+  const ID_material = req.params.ID_material;
+  const { Amount: usedAmount } = req.body;
 
-    try {
-        const material = await Materials.findOne({ where: { ID_material } });
+  try {
+    const material = await Materials.findOne({ where: { ID_material } });
 
-        if (!material) {
-            return res.status(404).json({ message: 'Materijal nije pronađen.' });
-        }
-
-        const newAmount = material.Amount - usedAmount;
-
-        if (newAmount < 0) {
-            return res.status(400).json({ message: 'Nema dovoljno materijala na skladištu.' });
-        }
-
-        await Materials.update(
-            { Amount: newAmount },
-            { where: { ID_material } }
-        );
-
-        const warning = newAmount <= material.MinAmount;
-
-        res.status(200).json({
-            message: warning ? 'Materijal je pao ispod minimalne količine!' : 'Količina ažurirana.',
-            warning,
-        });
-    } catch (error) {
-        console.error('Greška kod ažuriranja materijala:', error);
-        res.status(500).json({ message: 'Greška na serveru.' });
+    if (!material) {
+      return res.status(404).json({ message: 'Materijal nije pronađen.' });
     }
+
+    const newAmount = material.Amount - usedAmount;
+
+    if (newAmount < 0) {
+      return res.status(400).json({ message: 'Nema dovoljno materijala na skladištu.' });
+    }
+
+    await Materials.update(
+      { Amount: newAmount },
+      { where: { ID_material } }
+    );
+
+    const warning = newAmount <= material.MinAmount;
+
+    res.status(200).json({
+      message: warning ? 'Materijal je pao ispod minimalne količine!' : 'Količina ažurirana.',
+      warning,
+    });
+  } catch (error) {
+    console.error('Greška kod ažuriranja materijala:', error);
+    res.status(500).json({ message: 'Greška na serveru.' });
+  }
 };
 
 

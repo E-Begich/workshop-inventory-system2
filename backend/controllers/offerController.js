@@ -38,6 +38,15 @@ const addOffer = async (req, res) => {
             HasReceipt: false
         });
 
+        // Logiranje kreiranja ponude
+        await logChange({
+            userId: ID_user,
+            actionType: 'kreirana_ponuda',
+            objectType: 'Ponuda',
+            objectId: newOffer.ID_offer,
+            note: 'Ponuda kreirana u sustavu'
+        });
+
         res.status(201).json(newOffer);
 
     } catch (error) {
@@ -64,6 +73,16 @@ const getOneOffer = async (req, res) => {
 const updateOffer = async (req, res) => {
     let ID_offer = req.params.ID_offer
     const offer = await Offer.update(req.body, { where: { ID_offer: ID_offer } })
+
+    // Logiranje izmjene ponude
+    await logChange({
+        userId: req.body.ID_user, // ili tko je trenutno prijavljen
+        actionType: 'izmjena_ponude',
+        objectType: 'Ponuda',
+        objectId: ID_offer,
+        note: 'Ponuda ažurirana'
+    });
+
     res.status(200).send(offer)
 }
 
@@ -72,6 +91,16 @@ const deleteOffer = async (req, res) => {
 
     let ID_offer = req.params.ID_offer
     await Offer.destroy({ where: { ID_offer: ID_offer } })
+
+    // Logiranje brisanja ponude
+    await logChange({
+        userId: req.body.ID_user || 0, // stavi ID trenutno prijavljenog
+        actionType: 'brisanje_ponude',
+        objectType: 'Ponuda',
+        objectId: ID_offer,
+        note: 'Ponuda obrisana'
+    });
+
     res.send('Ponuda je obrisana!')
 }
 
@@ -135,6 +164,15 @@ const createOfferWithItems = async (req, res) => {
 
         // 3. Commit transakcije
         await t.commit();
+
+        // Logiranje kreiranja ponude s artiklima
+        await logChange({
+            userId: ID_user,
+            actionType: 'kreirana_ponuda_s_artiklima',
+            objectType: 'Ponuda',
+            objectId: offer.ID_offer,
+            note: `Ponuda kreirana s ${items.length} stavki`
+        });
 
         res.status(201).json({ message: 'Ponuda i stavke su uspješno kreirani', offer });
     } catch (error) {

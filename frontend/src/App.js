@@ -12,6 +12,7 @@ import CreateReceipt from './pages/CreateReceipt';
 import ShowClient from './pages/ShowClient';
 import ShowOffer from './pages/ShowOffer';
 import ShowReceipt from './pages/ShowReceipt';
+import ShowWarehouseChange from './pages/ShowWarehouseChange';
 import Sidebar from "./components/Sidebar";
 import TopNavBar from "./components/TopNavBar";
 import Login from "./pages/Login";
@@ -64,9 +65,9 @@ const Layout = ({ sidebarOpen, toggleSidebar }) => {
             <Route
               path="/getAllUsers"
               element={
-                <PrivateRoute>
+              
                   <ShowUser />
-                </PrivateRoute>
+               
               }
             />
             <Route
@@ -114,6 +115,14 @@ const Layout = ({ sidebarOpen, toggleSidebar }) => {
               element={
                 <PrivateRoute>
                   <ShowReceipt />
+                </PrivateRoute>
+              }
+            />
+                        <Route
+              path="/showWarehouseChange"
+              element={
+                <PrivateRoute>
+                  <ShowWarehouseChange />
                 </PrivateRoute>
               }
             />

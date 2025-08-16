@@ -1,4 +1,6 @@
-const db = require('../models')
+const db = require('../models');
+const dayjs = require('dayjs');
+
 
 //creating main models
 const User = db.User
@@ -15,54 +17,128 @@ const WarehouseChange = db.WarehouseChange
 //1. create user 
 const addChange = async (req, res) => {
 
-    let info = {
-        ID_change: req.body.ID_change,
-        ID_material: req.body.ID_material,
-        ID_user: req.body.ID_user,
-        ChangeDate: req.body.ChangeDate,
-        Amount: req.body.Amount,
-        TypeChange: req.body.TypeChange,
-        Note: req.body.Note,
-    }
+  let info = {
+    ID_change: req.body.ID_change,
+    ID_material: req.body.ID_material,
+    ID_user: req.body.ID_user,
+    ChangeDate: req.body.ChangeDate,
+    Amount: req.body.Amount,
+    TypeChange: req.body.TypeChange,
+    Note: req.body.Note,
+  }
 
-    const change = await WarehouseChange.create(info)
-    res.status(200).send(change)
-    console.log(change)
+  const change = await WarehouseChange.create(info)
+  res.status(200).send(change)
+  console.log(change)
 }
 
 // 2. Gets all users from table
 const getAllChange = async (req, res) => {
-    let change = await WarehouseChange.findAll({})
-    res.send(change)
+  let change = await WarehouseChange.findAll({})
+  res.send(change)
 }
 
 //3. Get one user over id
-const getOneChange= async (req, res) => {
+const getOneChange = async (req, res) => {
 
-    let ID_change = req.params.ID_change
-    let change = await WarehouseChange.findOne({ where: { ID_change: ID_change}})
-    res.status(200).send(change)
+  let ID_change = req.params.ID_change
+  let change = await WarehouseChange.findOne({ where: { ID_change: ID_change } })
+  res.status(200).send(change)
 }
 
 //4. update user over id
 const updateChange = async (req, res) => {
-    let ID_change = req.params.ID_change
-    const change = await WarehouseChange.update(req.body, {where: { ID_change: ID_change }})
-    res.status(200).send(change)
+  let ID_change = req.params.ID_change
+  const change = await WarehouseChange.update(req.body, { where: { ID_change: ID_change } })
+  res.status(200).send(change)
 }
 
 //5. delete user by id
 const deleteChange = async (req, res) => {
 
-    let ID_change = req.params.ID_change
-    await WarehouseChange.destroy({where: { ID_change: ID_change }})
-    res.send('Obrisano!')
+  let ID_change = req.params.ID_change
+  await WarehouseChange.destroy({ where: { ID_change: ID_change } })
+  res.send('Obrisano!')
 }
 
+/**
+ * Zabilježi promjenu / akciju u sustavu
+ * 
+ * @param {Object} params
+ * @param {number} params.userId - ID korisnika koji je napravio akciju
+ * @param {string} params.actionType - tip akcije (npr. 'kreirana_ponuda', 'dodano', 'uklonjeno')
+ * @param {string} params.objectType - tip entiteta na koji se akcija odnosi ('Ponuda', 'Racun', 'Materijal', 'Klijent', ...)
+ * @param {number} [params.objectId] - ID entiteta na koji se akcija odnosi
+ * @param {number} [params.materialId] - ID materijala ako se radi o promjeni skladišta
+ * @param {number} [params.amount] - količina ako je vezano za materijal
+ * @param {string} [params.note] - bilješke
+ */
+const logChange = async ({ userId, actionType, objectType, objectId, amount, materialId, note }) => {
+  try {
+    const change = await WarehouseChange.create({
+      ID_user: userId,
+      ActionType: actionType,
+      ObjectType: objectType,
+      ObjectID: objectId,
+      Amount: amount || null,
+      ID_material: materialId || null,
+      Note: note || ''
+    });
+    return change;
+  } catch (error) {
+    console.error('Greška pri logiranju promjene:', error);
+    throw error;
+  }
+};
+
+const getAllChanges = async (req, res) => {
+  try {
+    const changes = await WarehouseChange.findAll({
+      attributes: [
+        'ID_change',
+        'ActionType',
+        'ObjectType',
+        'ObjectID',
+        'Amount',
+        'Note',
+        'ChangeDate'
+      ],
+      include: [
+        {
+          model: User,
+          as: 'User',
+          attributes: ['Name']
+        },
+        {
+          model: Materials,
+          as: 'Material',
+          attributes: ['NameMaterial']
+        }
+      ],
+      order: [['ChangeDate', 'DESC']] // sortiraj po stvarnom polju u bazi
+    });
+
+    // formatiramo createdAt u ISO string
+    const formattedChanges = changes.map(change => {
+      const data = change.toJSON();
+      data.ChangeDate = dayjs(data.ChangeDate).toISOString(); // ili format po želji
+      return data;
+    });
+
+    res.status(200).json(formattedChanges);
+  } catch (error) {
+    console.error('Greška kod dohvaćanja promjena:', error);
+    res.status(500).json({ message: 'Greška na serveru.' });
+  }
+};
+
+
 module.exports = {
-    addChange,
-    getAllChange,
-    getOneChange,
-    updateChange,
-    deleteChange
+  addChange,
+  getAllChange,
+  getOneChange,
+  updateChange,
+  deleteChange,
+  logChange,
+  getAllChanges
 }

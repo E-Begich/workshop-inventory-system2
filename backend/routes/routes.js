@@ -11,16 +11,17 @@ const receiptController = require('../controllers/receiptController.js')
 const receiptItemsController = require('../controllers/receiptItemsController.js')
 const supplierController = require('../controllers/supplierController.js')
 const materialsController = require('../controllers/materialsController.js')
+
+
+
+const router = require('express').Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 
 
 
-const router = require('express').Router()
-
-
 //Table User
 router.post('/addUser', authMiddleware, userController.addUser);
-router.get('/getAllUsers', authMiddleware, userController.getAllUsers);
+router.get('/getAllUsers', userController.getAllUsers);
 router.get('/getOneUser/:ID_user', authMiddleware, userController.getOneUser);
 router.put('/updateUser/:ID_user', authMiddleware, userController.updateUser);
 router.delete('/deleteUser/:ID_user', authMiddleware, userController.deleteUser);
@@ -66,7 +67,7 @@ router.get('/getTypeItemEnum', offerItemsController.getTypeItemEnum);
 
 //Table WarehouseChange
 router.post('/addChange', authMiddleware,warehouseChangeController.addChange);
-router.get('/getAllChange', authMiddleware, warehouseChangeController.getAllChange);
+router.get('/getAllChanges', authMiddleware, warehouseChangeController.getAllChanges);
 router.get('/getOneChange/:ID_change', authMiddleware, warehouseChangeController.getOneChange);
 router.put('/updateChange/:ID_change', authMiddleware, warehouseChangeController.updateChange);
 router.delete('/deleteChange/:ID_change', authMiddleware, warehouseChangeController.deleteChange);

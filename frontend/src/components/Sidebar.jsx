@@ -136,7 +136,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </li>
 
           <li className="nav-item mb-2">
-            <Link to="/activity" className="nav-link text-white">
+            <Link to="/showWarehouseChange" className="nav-link text-white">
               <i className="fas fa-folder me-2" />
               Aktivnosti
             </Link>
