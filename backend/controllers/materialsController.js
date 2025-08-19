@@ -15,10 +15,9 @@ const WarehouseChange = db.WarehouseChange
 
 //1. create user 
 const addMaterial = async (req, res) => {
-
   try {
-    let info = {
-      ID_material: req.body.ID_material,
+    // Pripremamo podatke za kreiranje materijala
+    const info = {
       NameMaterial: req.body.NameMaterial,
       CodeMaterial: req.body.CodeMaterial,
       Amount: req.body.Amount,
@@ -28,30 +27,33 @@ const addMaterial = async (req, res) => {
       MinAmount: req.body.MinAmount,
       PurchasePrice: req.body.PurchasePrice,
       SellingPrice: req.body.SellingPrice,
-      TypeChange: req.body.TypeChange,
       ID_supplier: req.body.ID_supplier,
+      TypeChange: req.body.TypeChange, // OBAVEZNO
     };
 
+    // Kreiramo materijal u bazi
     const material = await Materials.create(info);
 
     // Logiranje kreiranja materijala
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'dodano',
+      actionType: 'dodano',            // tip akcije
       objectType: 'Materijal',
       objectId: material.ID_material,
+      materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName
       amount: material.Amount,
-      materialId: material.ID_material,
-      note: `Dodavanje materijala: ${material.NameMaterial}`
+      note: `Materijal "${material.NameMaterial}" je dodan`
     });
 
-    res.status(200).send(material);
-    console.log(material);
+    // Odgovor klijentu
+    res.status(200).json(material);
+
   } catch (error) {
     console.error('Greška pri dodavanju materijala:', error);
-    res.status(500).send({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
+
 
 
 // 2. Gets all users from table
@@ -86,14 +88,12 @@ const updateMaterial = async (req, res) => {
     // Logiranje promjene
     await logChange({
       userId: req.user.ID_user,
-      userName: req.user.Username,  // <- ako ti je ime korisnika u tokenu
-      actionType: 'ispravak',
+      actionType: 'ispravak',            // tip akcije
       objectType: 'Materijal',
       objectId: material.ID_material,
-      materialId: material.ID_material,
-      materialName: material.NameMaterial, // <- ime umjesto samo ID
+      materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName
       amount: material.Amount,
-      note: `Ažurirani podaci materijala: ${material.NameMaterial}`,
+      note: `Materijal "${material.NameMaterial}" je uređen.`
     });
 
     res.status(200).json(material);
@@ -103,7 +103,7 @@ const updateMaterial = async (req, res) => {
   }
 };
 
-//5. delete user by id
+//5. delete material by id
 //const deleteMaterial = async (req, res) => {
 //  let ID_material = req.params.ID_material
 //  await Materials.destroy({ where: { ID_material: ID_material } })
@@ -123,11 +123,10 @@ const deleteMaterial = async (req, res) => {
     // Logiranje brisanja
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'uklonjeno',
+      actionType: 'uklonjeno_sa_skladista',            // tip akcije
       objectType: 'Materijal',
       objectId: material.ID_material,
-      materialId: material.ID_material,
-      materialName: material.NameMaterial, // ovo se sprema u bazu
+      materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName
       amount: -material.Amount,
       note: `Materijal "${material.NameMaterial}" je obrisan`
     });

@@ -1,5 +1,7 @@
 const { TABLOCKX } = require('sequelize/lib/table-hints')
 const db = require('../models')
+const { logChange } = require('./warehouseChangeController');
+
 
 //creating main models
 const User = db.User
@@ -44,7 +46,8 @@ const addOffer = async (req, res) => {
             actionType: 'kreirana_ponuda',
             objectType: 'Ponuda',
             objectId: newOffer.ID_offer,
-            note: 'Ponuda kreirana u sustavu'
+            offerNumber: newOffer.ID_offer,   // <-- ako imaš polje OfferNumber
+            note: `Ponuda "${newOffer.ID_offer}" je kreirana`
         });
 
         res.status(201).json(newOffer);
@@ -55,7 +58,7 @@ const addOffer = async (req, res) => {
     }
 };
 
-// 2. Gets all users from table
+// 2. Gets all offer from table
 const getAllOffer = async (req, res) => {
     let offer = await Offer.findAll({})
     res.send(offer)
@@ -76,33 +79,46 @@ const updateOffer = async (req, res) => {
 
     // Logiranje izmjene ponude
     await logChange({
-        userId: req.body.ID_user, // ili tko je trenutno prijavljen
-        actionType: 'izmjena_ponude',
+        userId: ID_user,
+        actionType: 'ispravak',
         objectType: 'Ponuda',
-        objectId: ID_offer,
-        note: 'Ponuda ažurirana'
+        objectId: newOffer.ID_offer,
+        offerNumber: newOffer.ID_offer,   // <-- ako imaš polje OfferNumber
+        note: `Ponuda "${newOffer.ID_offer}" je kreirana`
     });
 
     res.status(200).send(offer)
 }
 
-//5. delete user by id
+//5. delete offer by id
 const deleteOffer = async (req, res) => {
+  try {
+    const ID_user = req.user?.ID_user; // dohvaća iz tokena/sessiona
+    const ID_offer = req.params.ID_offer;
 
-    let ID_offer = req.params.ID_offer
-    await Offer.destroy({ where: { ID_offer: ID_offer } })
+    const offer = await Offer.findByPk(ID_offer);
+    if (!offer) {
+      return res.status(404).json({ message: "Ponuda nije pronađena" });
+    }
 
-    // Logiranje brisanja ponude
+    await Offer.destroy({ where: { ID_offer } });
+
     await logChange({
-        userId: req.body.ID_user || 0, // stavi ID trenutno prijavljenog
-        actionType: 'brisanje_ponude',
-        objectType: 'Ponuda',
-        objectId: ID_offer,
-        note: 'Ponuda obrisana'
+      userId: ID_user,
+      actionType: "obrisana_ponuda",
+      objectType: "Ponuda",
+      objectId: offer.ID_offer,
+      offerNumber: offer.ID_offer,
+      note: `Ponuda "${offer.ID_offer}" je obrisana`,
     });
 
-    res.send('Ponuda je obrisana!')
-}
+    res.send("Ponuda je obrisana!");
+  } catch (error) {
+    console.error("Greška kod brisanja ponude:", error);
+    res.status(500).json({ message: "Greška na serveru" });
+  }
+};
+
 
 const getOfferWithDetails = async (req, res) => {
     let ID_offer = req.params.ID_offer;

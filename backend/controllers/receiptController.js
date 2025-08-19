@@ -1,4 +1,5 @@
-const db = require('../models')
+const db = require('../models');
+const { logChange } = require('./warehouseChangeController');
 
 //creating main models
 const User = db.User
@@ -45,9 +46,19 @@ const addReceipt = async (req, res) => {
       PaymentMethod: req.body.PaymentMethod
     };
 
-    console.log("Finalni receipt info:", info);
+    // console.log("Finalni receipt info:", info);
 
     const receipt = await db.Receipt.create(info);
+
+    // Logiranje kreiranja računa
+    await logChange({
+      userId: req.body.ID_user,
+      actionType: 'kreiran_racun',
+      objectType: 'Racun',
+      objectId: receipt.ID_receipt,
+      receiptNumber: receipt.ReceiptNumber,  // ovo će biti EntityName
+      note: `Račun "${receipt.ReceiptNumber}" je dodan`
+    });
 
     res.status(201).json(receipt);
   } catch (error) {
@@ -71,20 +82,65 @@ const getOneReceipt = async (req, res) => {
   res.status(200).send(receipt)
 }
 
-//4. update user over id
+//4. update RECEIPT // ZA SADA SE NE KORISTI ALI ZA UBUDUĆE DA IMAMO
 const updateReceipt = async (req, res) => {
-  let ID_receipt = req.params.ID_receipt
-  const receipt = await Receipt.update(req.body, { where: { ID_receipt: ID_receipt } })
-  res.status(200).send(receipt)
-}
+  try {
+    let ID_receipt = req.params.ID_receipt;
 
-//5. delete user by id
+    // prvo dohvatimo račun da znamo broj
+    const receipt = await Receipt.findByPk(ID_receipt);
+    if (!receipt) {
+      return res.status(404).json({ error: "Račun nije pronađen." });
+    }
+
+    await Receipt.update(req.body, { where: { ID_receipt } });
+
+    // Logiranje izmjene računa
+    await logChange({
+      userId: req.body.ID_user,
+      actionType: 'izmijenjen_racun',
+      objectType: 'Racun',
+      objectId: receipt.ID_receipt,
+      receiptNumber: receipt.ReceiptNumber,
+      note: `Račun "${receipt.ReceiptNumber}" je izmijenjen`
+    });
+
+    res.status(200).json({ message: "Račun je uspješno ažuriran." });
+  } catch (error) {
+    console.error("Greška u updateReceipt:", error);
+    res.status(500).json({ error: "Greška pri ažuriranju računa." });
+  }
+};
+
+//5. delete RECEIPT // ZA SADA SE NE KORISTI BRISANJE, UKOLIKO NEKADA BUDE POTREBNO 
 const deleteReceipt = async (req, res) => {
+  try {
+    let ID_receipt = req.params.ID_receipt;
 
-  let ID_receipt = req.params.ID_receipt
-  await Receipt.destroy({ where: { ID_receipt: ID_receipt } })
-  res.send('Račun je obrisan!')
-}
+    // dohvatimo račun prije brisanja (da znamo broj za log)
+    const receipt = await Receipt.findByPk(ID_receipt);
+    if (!receipt) {
+      return res.status(404).json({ error: "Račun nije pronađen." });
+    }
+
+    await Receipt.destroy({ where: { ID_receipt } });
+
+    // Logiranje brisanja računa
+    await logChange({
+      userId: req.body.ID_user,
+      actionType: 'obrisan_racun',
+      objectType: 'Racun',
+      objectId: receipt.ID_receipt,
+      receiptNumber: receipt.ReceiptNumber,
+      note: `Račun "${receipt.ReceiptNumber}" je obrisan`
+    });
+
+    res.send('Račun je obrisan!');
+  } catch (error) {
+    console.error("Greška u deleteReceipt:", error);
+    res.status(500).json({ error: "Greška pri brisanju računa." });
+  }
+};
 
 // 6. Create receipt from offer
 const createReceiptFromOffer = async (req, res) => {
@@ -158,6 +214,15 @@ const createReceiptFromOffer = async (req, res) => {
       ID_offer,
       ID_user,
       PaymentMethod
+    });
+
+    await logChange({
+      userId: ID_user,
+      actionType: 'kreiran_racun',
+      objectType: 'Racun',
+      objectId: receipt.ID_receipt,
+      receiptNumber: receipt.ReceiptNumber,
+      note: `Račun "${receipt.ReceiptNumber}" je kreiran iz ponude #${ID_offer}`
     });
 
     // 6. Oznaci ponudu kao iskorištenu

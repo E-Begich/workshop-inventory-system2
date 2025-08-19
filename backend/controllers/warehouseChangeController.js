@@ -73,23 +73,47 @@ const deleteChange = async (req, res) => {
  * @param {number} [params.amount] - količina ako je vezano za materijal
  * @param {string} [params.note] - bilješke
  */
-const logChange = async ({ userId, actionType, objectType, objectId, amount, materialId, note }) => {
+// controllers/warehouseChangeController.js
+const logChange = async ({
+  userId,
+  actionType,
+  objectType,
+  objectId,
+  materialName,
+  clientType,
+  clientName,
+  clientContactName,
+  supplierName,
+  receiptNumber,
+  amount,
+  note
+}) => {
   try {
-    const change = await WarehouseChange.create({
+    // Odredi prikazni naziv entiteta
+    let entityName = '-';
+    if (objectType === 'Materijal') entityName = materialName || '-';
+    else if (objectType === 'Klijent') {
+      entityName = clientType === 'Tvrtka' ? clientName || '-' : clientContactName || '-';
+    }
+    else if (objectType === 'Dobavljac') entityName = supplierName || '-';
+    else if (objectType === 'Ponuda') entityName = `Ponuda #${objectId}`;
+    else if (objectType === 'Racun') entityName = receiptNumber || '-';  // <-- samo broj računa
+
+    await WarehouseChange.create({
       ID_user: userId,
       ActionType: actionType,
       ObjectType: objectType,
       ObjectID: objectId,
-      Amount: amount || null,
-      ID_material: materialId || null,
-      Note: note || ''
+      Amount: amount,
+      Note: note,
+      EntityName: entityName,
     });
-    return change;
+
   } catch (error) {
-    console.error('Greška pri logiranju promjene:', error);
-    throw error;
+    console.error('Greška kod logiranja promjene:', error);
   }
 };
+
 
 const getAllChanges = async (req, res) => {
   try {
@@ -101,6 +125,7 @@ const getAllChanges = async (req, res) => {
         'ObjectID',
         'Amount',
         'Note',
+        'EntityName',
         'ChangeDate'
       ],
       include: [
@@ -108,20 +133,14 @@ const getAllChanges = async (req, res) => {
           model: User,
           as: 'User',
           attributes: ['Name']
-        },
-        {
-          model: Materials,
-          as: 'Material',
-          attributes: ['NameMaterial']
         }
       ],
-      order: [['ChangeDate', 'DESC']] // sortiraj po stvarnom polju u bazi
+      order: [['ChangeDate', 'DESC']]
     });
 
-    // formatiramo createdAt u ISO string
     const formattedChanges = changes.map(change => {
       const data = change.toJSON();
-      data.ChangeDate = dayjs(data.ChangeDate).toISOString(); // ili format po želji
+      data.ChangeDate = new Date(data.ChangeDate).toISOString();
       return data;
     });
 
@@ -131,7 +150,6 @@ const getAllChanges = async (req, res) => {
     res.status(500).json({ message: 'Greška na serveru.' });
   }
 };
-
 
 module.exports = {
   addChange,
