@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Table, Button } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { useNavigate } from "react-router-dom";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -19,8 +20,13 @@ const HomePage = () => {
   const [totalMaterials, setTotalMaterials] = useState(0);
   const [lowStock, setLowStock] = useState(0);
 
-  const [chartData, setChartData] = useState(null);
+  const [chartData, setChartData] = useState();
+  const [topMaterialsData, setTopMaterialsData] = useState(null);
 
+  const [receipts, setReceipts] = useState([]);
+  const navigate = useNavigate();
+
+  const [clients, setClients] = useState([]);
 
   useEffect(() => {
     fetch("/api/aplication/getAllReceipt", {
@@ -212,7 +218,70 @@ const HomePage = () => {
     },
   };
 
+  useEffect(() => {
+    fetch("/api/aplication/getTopMaterials", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // Pretvaramo podatke u format za Chart.js
+        const chartData = {
+          labels: data.map((m) => m.NameMaterial),
+          datasets: [
+            {
+              label: 'Minimalna količina',
+              data: data.map((m) => m.MinAmount),
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            },
+            {
+              label: 'Stvarna količina',
+              data: data.map((m) => m.Amount),
+              backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            },
+          ],
+        };
+        setTopMaterialsData(chartData);
+      })
+      .catch((err) => console.error('Greška kod dohvata top materijala:', err));
+  }, []);
 
+  useEffect(() => {
+    fetch("/api/aplication/getAllReceipt", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        // sortiramo po datumu opadajuće i uzmemo samo 5
+        const last5 = data.sort((a, b) => new Date(b.DateReceipt) - new Date(a.DateReceipt)).slice(0, 5);
+        setReceipts(last5);
+      })
+      .catch(err => console.error("Greška kod dohvaćanja računa:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/aplication/getAllClients", {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => setClients(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  const getClientName = (id) => {
+    const client = clients.find(c => c.ID_client === id);
+    return client ? (client.TypeClient === 'Tvrtka' ? client.Name : client.ContactName) : 'Nepoznato';
+  };
+
+  const smallText = {
+    fontSize: "0.5em",
+    color: "gray" // opcionalno
+  };
 
   return (
     <Container fluid className="p-4">
@@ -222,7 +291,7 @@ const HomePage = () => {
           {/* Prihodi */}
           <Card className="shadow-sm">
             <Card.Body>
-              <h5>Ukupni prihodi</h5>
+              <h5>Ukupni prihodi <span style={smallText}>(bez PDV-a)</span></h5>
               <h3>{totalRevenue.toFixed(2)} €</h3>
               <small className={revenueChange >= 0 ? "text-success" : "text-danger"}>
                 {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}% ovaj mjesec
@@ -247,8 +316,10 @@ const HomePage = () => {
             <Card.Body>
               <h5>Aktivne ponude</h5>
               <h3>{activeOffers}</h3>
-              <small className="text-warning">
-                {expiringSoon} {expiringSoon === 1 ? "ponuda istječe" : "ponude istječu"} unutar 2 dana
+              <small className={expiringSoon > 0 ? "text-warning" : "text-success"}>
+                {expiringSoon > 0
+                  ? `${expiringSoon} ${expiringSoon === 1 ? "ponuda istječe" : "ponude istječu"} unutar 2 dana`
+                  : "Nema ponuda sa istekom"}
               </small>
             </Card.Body>
           </Card>
@@ -282,12 +353,15 @@ const HomePage = () => {
         </Col>
         <Col md={4}>
           <Card className="shadow-sm">
-            <Card.Body>
-              <h5>Potrošnja materijala</h5>
-              <div style={{ height: "250px", backgroundColor: "#f8f9fa" }}>
-                {/* Ovdje može pie chart */}
-                <p className="text-center mt-5">[Pie chart - Chart.js placeholder]</p>
-              </div>
+            <Card.Body className="d-flex flex-column">
+              <h5>Top 5 materijala po količini</h5>
+              {topMaterialsData ? (
+                <div style={{ height: '100%', minHeight: '250px' }}>
+                  <Bar data={topMaterialsData} options={{ maintainAspectRatio: false }} />
+                </div>
+              ) : (
+                <p className="text-center mt-5">Nema podataka za prikaz</p>
+              )}
             </Card.Body>
           </Card>
         </Col>
@@ -309,22 +383,35 @@ const HomePage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>123</td>
-                    <td>Ivan Horvat</td>
-                    <td>450 €</td>
-                    <td><span className="badge bg-success">Plaćeno</span></td>
-                  </tr>
-                  <tr>
-                    <td>124</td>
-                    <td>Marko Marković</td>
-                    <td>320 €</td>
-                    <td><span className="badge bg-warning text-dark">Na čekanju</span></td>
-                  </tr>
+                  {receipts.length > 0 ? (
+                    receipts.map((r, index) => (
+                      <tr key={r.ID_receipt}>
+                        <td>{index + 1}</td>
+                        <td>{getClientName(r.ID_client)}</td>
+                        <td>{Number(r.PriceNoTax).toFixed(2)} €</td>
+                        <td>
+                          <span className="badge bg-success">Plaćeno</span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="text-center">
+                        Nema podataka
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </Table>
-              <Button variant="outline-primary" size="sm">Pogledaj sve</Button>
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={() => navigate("/showReceipt")}
+              >
+                Pogledaj sve
+              </Button>
             </Card.Body>
+
           </Card>
         </Col>
 

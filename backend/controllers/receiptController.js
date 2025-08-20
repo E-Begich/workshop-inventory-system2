@@ -507,6 +507,21 @@ const getMonthlySales = async (req, res) => {
   }
 };
 
+const getTopMaterials = async (req, res) => {
+  try {
+    const topMaterials = await Materials.findAll({
+      attributes: ['NameMaterial', 'Amount', 'MinAmount'],
+      order: [['Amount', 'DESC']],
+      limit: 5
+    });
+    res.json(topMaterials);
+  } catch (err) {
+    console.error('Greška kod dohvaćanja top materijala:', err);
+    res.status(500).json({ error: 'Greška na serveru' });
+  }
+};
+
+
 module.exports = {
   addReceipt,
   getAllReceipt,
@@ -517,5 +532,6 @@ module.exports = {
   getPaymentEnum,
   getReceiptWithDetails,
   generateReceiptPDF,
-  getMonthlySales
+  getMonthlySales,
+  getTopMaterials
 }
