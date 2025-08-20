@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     Unit: {
-      type: DataTypes.ENUM('Metri', 'Centimetri'),
+      type: DataTypes.ENUM('M', 'Cm', 'M/2'),
       allowNull: false,
     },
     Location: {

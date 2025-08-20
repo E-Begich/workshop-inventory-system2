@@ -1,5 +1,6 @@
 const db = require('../models');
 const { logChange } = require('./warehouseChangeController');
+const sequelize = db.sequelize; // ovo je ključ! instanca Sequelize
 
 //creating main models
 const User = db.User
@@ -481,6 +482,31 @@ const generateReceiptPDF = async (req, res) => {
   }
 };
 
+const getMonthlySales = async (req, res) => {
+  try {
+    const results = await Receipt.findAll({
+      attributes: [
+        [sequelize.fn("YEAR", sequelize.col("DateCreate")), "year"],
+        [sequelize.fn("MONTH", sequelize.col("DateCreate")), "month"],
+        [sequelize.fn("SUM", sequelize.col("PriceNoTax")), "total"] // mislim da treba PriceNoTax, ne Total
+      ],
+      group: [
+        sequelize.fn("YEAR", sequelize.col("DateCreate")),
+        sequelize.fn("MONTH", sequelize.col("DateCreate"))
+      ],
+      order: [
+        [sequelize.fn("YEAR", sequelize.col("DateCreate")), "ASC"],
+        [sequelize.fn("MONTH", sequelize.col("DateCreate")), "ASC"]
+      ]
+    });
+
+    res.json(results);
+  } catch (err) {
+    console.error("Greška kod dohvaćanja mjesečne prodaje:", err);
+    res.status(500).json({ error: "Greška na serveru" });
+  }
+};
+
 module.exports = {
   addReceipt,
   getAllReceipt,
@@ -490,5 +516,6 @@ module.exports = {
   createReceiptFromOffer,
   getPaymentEnum,
   getReceiptWithDetails,
-  generateReceiptPDF
+  generateReceiptPDF,
+  getMonthlySales
 }

@@ -1,6 +1,10 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { Container, Row, Col, Card, Table, ProgressBar, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Table, Button } from "react-bootstrap";
+import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const HomePage = () => {
   const [totalRevenue, setTotalRevenue] = useState(0);
@@ -11,6 +15,12 @@ const HomePage = () => {
 
   const [activeOffers, setActiveOffers] = useState(0);
   const [expiringSoon, setExpiringSoon] = useState(0);
+
+  const [totalMaterials, setTotalMaterials] = useState(0);
+  const [lowStock, setLowStock] = useState(0);
+
+  const [chartData, setChartData] = useState(null);
+
 
   useEffect(() => {
     fetch("/api/aplication/getAllReceipt", {
@@ -136,6 +146,73 @@ const HomePage = () => {
       });
   }, []);
 
+  useEffect(() => {
+    fetch("/api/aplication/getAllMaterial", {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data); // provjeri strukturu
+
+        const materials = Array.isArray(data) ? data : data.materials || [];
+
+        // Broj artikala = broj redova u tablici
+        setTotalMaterials(materials.length);
+
+        // Broj artikala pri isteku (Amount <= MinAmount)
+        const lowStockCount = materials.filter(m =>
+          parseFloat(m.Amount) <= parseFloat(m.MinAmount)
+        ).length;
+
+        setLowStock(lowStockCount);
+      })
+      .catch(err => console.error("Greška kod dohvata materijala:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/aplication/getMonthlySales", {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Podaci za graf:", data);
+        if (!Array.isArray(data)) return;
+
+        const labels = data.map(item => `${item.month}.${item.year}`);
+        const totals = data.map(item => Number(item.total));
+
+        setChartData({
+          labels: labels,
+          datasets: [
+            {
+              label: "Prodaja (€)",
+              data: totals,
+              backgroundColor: "rgba(75,192,192,0.6)"
+            }
+          ]
+        });
+      })
+      .catch(err => console.error("Greška pri dohvaćanju podataka:", err));
+  }, []);
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Mjesečna prodaja",
+      },
+    },
+  };
+
+
 
   return (
     <Container fluid className="p-4">
@@ -180,8 +257,12 @@ const HomePage = () => {
           <Card className="shadow-sm">
             <Card.Body>
               <h5>Stanje skladišta</h5>
-              <h3>128 artikala</h3>
-              <small className="text-danger">3 pri isteku zaliha</small>
+              <h3>{totalMaterials} artikala</h3>
+              <small className={lowStock > 0 ? "text-danger" : "text-success"}>
+                {lowStock > 0
+                  ? `${lowStock} pri isteku zaliha`
+                  : "Sve zalihe stabilne"}
+              </small>
             </Card.Body>
           </Card>
         </Col>
@@ -194,8 +275,7 @@ const HomePage = () => {
             <Card.Body>
               <h5>Prodaja po mjesecima</h5>
               <div style={{ height: "250px", backgroundColor: "#f8f9fa" }}>
-                {/* Ovdje može ići graf preko chart.js */}
-                <p className="text-center mt-5">[Graf prodaje - Chart.js placeholder]</p>
+                {chartData && <Bar data={chartData} options={chartOptions} />}
               </div>
             </Card.Body>
           </Card>

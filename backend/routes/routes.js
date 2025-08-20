@@ -83,6 +83,7 @@ router.post('/createReceiptFromOffer', authMiddleware, receiptController.createR
 router.get('/getPaymentEnum', authMiddleware, receiptController.getPaymentEnum);
 router.get('/generateReceiptPDF/:ID_receipt', authMiddleware, receiptController.generateReceiptPDF);
 router.get('/getReceiptWithDetails/:ID_receipt', authMiddleware, receiptController.getReceiptWithDetails);
+router.get("/getMonthlySales", authMiddleware, receiptController.getMonthlySales);
 
 
 
