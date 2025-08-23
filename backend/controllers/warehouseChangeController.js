@@ -171,6 +171,38 @@ const getActivityLogs = async (req, res) => {
   }
 };
 
+// Dohvati nepročitane logove
+const getUnreadActivityLogs = async (req, res) => {
+  try {
+    const logs = await WarehouseChange.findAll({
+      where: { IsRead: false },
+      limit: 10,
+      order: [["ChangeDate", "DESC"]],
+      include: [{ model: User, as: "User", attributes: ["Name", "Lastname"] }],
+    });
+    res.json(logs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Greška kod dohvaćanja nepročitanih logova." });
+  }
+};
+
+// Označi sve nepročitane logove kao pročitane
+const markLogsAsRead = async (req, res) => {
+  try {
+    const [updated] = await WarehouseChange.update(
+      { IsRead: 1 },
+      { where: { IsRead: 0 } }
+    );
+    console.log("Broj ažuriranih redaka:", updated);
+    res.json({ success: true, updated });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Greška kod označavanja pročitanih logova." });
+  }
+};
+
+
 
 module.exports = {
   addChange,
@@ -180,5 +212,7 @@ module.exports = {
   deleteChange,
   logChange,
   getAllChanges,
-  getActivityLogs
+  getActivityLogs,
+  getUnreadActivityLogs,
+  markLogsAsRead
 }

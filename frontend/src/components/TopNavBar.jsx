@@ -1,20 +1,71 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import { Navbar, Container, Nav, Badge, Dropdown, Button } from "react-bootstrap";
-import { FaBell, FaEnvelope, FaBars } from "react-icons/fa";
+import { FaBell, FaBars } from "react-icons/fa";
 
 const TopNavBar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Dohvat korisničkih podataka iz localStorage
+  const navigate = useNavigate();
+
   const [user] = useState({
     Name: localStorage.getItem("Name") || "",
     Lastname: localStorage.getItem("Lastname") || "",
     Role: localStorage.getItem("Role") || "",
   });
 
+  const [unreadLogs, setUnreadLogs] = useState([]);
+
+  const fetchUnreadLogs = async () => {
+    try {
+      const res = await fetch("/api/aplication/getUnreadActivityLogs", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!res.ok) throw new Error("Greška pri dohvaćanju nepročitanih logova");
+      const data = await res.json();
+      setUnreadLogs(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markAsRead = async () => {
+    try {
+      const res = await fetch("/api/aplication/markLogsAsRead", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        await fetchUnreadLogs(); // refresh liste i badge-a
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadLogs();
+  }, []);
+
+  const formatLog = (log) => {
+    return `${log.ActionType} - ${log.EntityName || log.ObjectType}`;
+  };
+
+  useEffect(() => {
+    fetchUnreadLogs();
+    const interval = setInterval(fetchUnreadLogs, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = "/login"; // ili koristi navigate iz react-router
+    window.location.href = "/login";
   };
 
   return (
@@ -22,7 +73,7 @@ const TopNavBar = () => {
       <Container fluid>
         <Navbar.Brand className="fw-bold text-danger">ADMIN</Navbar.Brand>
 
-        {/* Hamburger button za male ekrane */}
+        {/* Hamburger za male ekrane */}
         <div className="d-lg-none ms-auto">
           <Button variant="light" onClick={() => setShowDropdown(!showDropdown)}>
             <FaBars />
@@ -33,47 +84,90 @@ const TopNavBar = () => {
               <Dropdown.Item className="d-flex align-items-center">
                 <span className="me-2 text-muted">{user.Name} {user.Lastname}</span>
               </Dropdown.Item>
+
               <Dropdown.Item className="d-flex align-items-center">
                 <FaBell className="me-2" />
-                Notifications
-                <Badge bg="danger" pill className="ms-auto">3+</Badge>
+                Nepročitane aktivnosti
+                <Badge bg="danger" pill className="ms-auto">{unreadLogs.length}</Badge>
               </Dropdown.Item>
-              <Dropdown.Item className="d-flex align-items-center">
-                <FaEnvelope className="me-2" />
-                Messages
-                <Badge bg="danger" pill className="ms-auto">7</Badge>
-              </Dropdown.Item>
+
               <Dropdown.Divider />
-              <Dropdown.Item onClick={handleLogout}>
-                Odjava
-              </Dropdown.Item>
+
+              {unreadLogs.length > 0 ? (
+                unreadLogs.map((log) => (
+                  <Dropdown.Item key={log.ID_change}>
+                    {formatLog(log)} <br />
+                    <small className="text-muted">{new Date(log.ChangeDate).toLocaleString()}</small>
+                  </Dropdown.Item>
+                ))
+              ) : (
+                <Dropdown.Item className="text-center text-muted">Nema novih logova</Dropdown.Item>
+              )}
+
+              {unreadLogs.length > 0 && (
+                <>
+                  <Dropdown.Divider />
+                  <Dropdown.Item className="text-center text-primary" onClick={markAsRead}>
+                    Označi sve kao pročitano
+                  </Dropdown.Item>
+                </>
+              )}
+
+              <Dropdown.Item onClick={handleLogout}>Odjava</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>
 
         {/* Veći ekrani */}
-        <Nav className="ms-auto d-none d-lg-flex align-items-center gap-4">
-          <div className="position-relative">
-            <FaBell size={18} />
-            <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">3+</Badge>
-          </div>
+        <Nav className="ms-auto d-none d-lg-flex align-items-center gap-3">
 
-          <div className="position-relative">
-            <FaEnvelope size={18} />
-            <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">7</Badge>
-          </div>
-
-          <div className="vr" /> {/* Okomita linija */}
-
+          {/* Zvonce */}
           <Dropdown align="end">
-            <Dropdown.Toggle variant="light" id="dropdown-user" className="d-flex align-items-center">
-              <span className="me-2 text-muted">{user.Name} {user.Lastname} ({user.Role})</span>
+            <Dropdown.Toggle variant="light" id="dropdown-bell" className="position-relative">
+              <FaBell size={18} />
+              {unreadLogs.length > 0 && (
+                <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">
+                  {unreadLogs.length}
+                </Badge>
+              )}
             </Dropdown.Toggle>
 
+            <Dropdown.Menu style={{ minWidth: '300px' }}>
+              {unreadLogs.length > 0 ? (
+                unreadLogs.map((log) => (
+                  <Dropdown.Item key={log.ID_change}>
+                    {formatLog(log)} <br />
+                    <small className="text-muted">{new Date(log.ChangeDate).toLocaleString()}</small>
+                  </Dropdown.Item>
+                ))
+              ) : (
+                <Dropdown.Item className="text-center text-muted">Nema novih logova</Dropdown.Item>
+              )}
+              {unreadLogs.length > 0 && (
+                <>
+                  <Dropdown.Divider />
+                  <Dropdown.Item className="text-center text-primary" onClick={markAsRead}>
+                    Označi sve kao pročitano
+                  </Dropdown.Item>
+                  <Dropdown.Item className="text-center text-primary" onClick={() => navigate("/showWarehouseChange")}>
+                    Pogledaj sve aktivnosti
+                  </Dropdown.Item>
+
+                </>
+              )}
+            </Dropdown.Menu>
+          </Dropdown>
+
+          {/* Dropdown korisnika */}
+          <Dropdown align="end">
+            <Dropdown.Toggle variant="light" id="dropdown-user">
+              {user.Name} {user.Lastname} ({user.Role})
+            </Dropdown.Toggle>
             <Dropdown.Menu>
               <Dropdown.Item onClick={handleLogout}>Odjava</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
+
         </Nav>
       </Container>
     </Navbar>

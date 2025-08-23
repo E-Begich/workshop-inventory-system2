@@ -73,8 +73,8 @@ router.put('/updateChange/:ID_change', authMiddleware, warehouseChangeController
 router.delete('/deleteChange/:ID_change', authMiddleware, warehouseChangeController.deleteChange);
 
 router.get('/getActivityLogs', authMiddleware, warehouseChangeController.getActivityLogs);
-
-
+router.get('/getUnreadActivityLogs', authMiddleware, warehouseChangeController.getUnreadActivityLogs);
+router.post('/markLogsAsRead', authMiddleware,warehouseChangeController.markLogsAsRead);
 
 //Table Receipt
 router.post('/addReceipt', authMiddleware, receiptController.addReceipt);

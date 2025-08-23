@@ -59,6 +59,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    IsRead: {
+      type: DataTypes.TINYINT,
+      allowNull: false,
+      defaultValue: 0,
+    }
   }, {
     tableName: 'WarehouseChange',
     timestamps: true,
