@@ -16,8 +16,9 @@ import ShowWarehouseChange from './pages/ShowWarehouseChange';
 import Sidebar from "./components/Sidebar";
 import TopNavBar from "./components/TopNavBar";
 import Login from "./pages/Login";
+import ArhivedOffers from "./pages/ArhivedOffers";
 import PrivateRoute from "./components/PrivateRoute";  // koristimo PrivateRoute
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 
 
 const Layout = ({ sidebarOpen, toggleSidebar }) => {
@@ -65,9 +66,9 @@ const Layout = ({ sidebarOpen, toggleSidebar }) => {
             <Route
               path="/getAllUsers"
               element={
-              
-                  <ShowUser />
-               
+
+                <ShowUser />
+
               }
             />
             <Route
@@ -118,7 +119,15 @@ const Layout = ({ sidebarOpen, toggleSidebar }) => {
                 </PrivateRoute>
               }
             />
-                        <Route
+            <Route
+              path="/getArhivedOffers"
+              element={
+                <PrivateRoute>
+                  <ArhivedOffers />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/showWarehouseChange"
               element={
                 <PrivateRoute>

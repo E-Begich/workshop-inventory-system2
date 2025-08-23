@@ -50,7 +50,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </Link>
           </li>
 
-                    <li className="nav-item mb-2">
+          <li className="nav-item mb-2">
             <Link to="/getAllSupplier" className="nav-link text-white">
               <i className="fas fa-folder me-2" />
               Dobavljači
@@ -129,6 +129,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   <Link to="/showReceipt" className="nav-link text-white">
                     <i className="fas fa-receipt me-2" />
                     Povijest računa
+                  </Link>
+                </li>
+                <li className="nav-item mb-1">
+                  <Link to="/getArhivedOffers" className="nav-link text-white">
+                    <i className="fas fa-archive" />
+                     Arhivirane ponude
                   </Link>
                 </li>
               </ul>

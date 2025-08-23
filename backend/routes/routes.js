@@ -55,6 +55,9 @@ router.delete('/deleteOffer/:ID_offer', authMiddleware, authorize('Offer', 'dele
 
 router.get('/generateOfferPDF/:ID_offer', authMiddleware, authorize('Offer', 'read'), offerController.generateOfferPDF);
 router.get('/getOfferWithDetails/:ID_offer', authMiddleware, authorize('Offer', 'read'), offerController.getOfferWithDetails);
+router.get("/getActiveOffers", authMiddleware, authorize("Offer", "read"), offerController.getActiveOffers);
+router.get("/getArhivedOffers", authMiddleware, authorize("Offer", "read"), offerController.getArhivedOffers);
+
 
 // Table OfferItems
 router.post('/addOfferItems', authMiddleware, offerItemsController.addOfferItems);
@@ -64,7 +67,6 @@ router.put('/updateOfferItem/:ID_offerItems', authMiddleware, offerItemsControll
 router.delete('/deleteOfferItem/:ID_offerItems', authMiddleware, offerItemsController.deleteOfferItem);
 
 router.get('/getTypeItemEnum', offerItemsController.getTypeItemEnum);
-
 
 //Table WarehouseChange
 router.post('/addChange', authMiddleware,warehouseChangeController.addChange);
@@ -117,8 +119,6 @@ router.get('/getAllMaterial', authMiddleware, materialsController.getAllMaterial
 router.get('/getOneMaterial/:ID_material', authMiddleware, materialsController.getOneMaterial);
 router.put('/updateMaterial/:ID_material', authMiddleware, materialsController.updateMaterial);
 router.delete('/deleteMaterial/:ID_material', authMiddleware, materialsController.deleteMaterial);
-
-
 
 router.get('/getLocationEnum', authMiddleware, materialsController.getLocationEnum);
 router.get('/getUnitEnum', authMiddleware, materialsController.getUnitEnum);

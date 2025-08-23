@@ -71,8 +71,9 @@ const TopNavBar = () => {
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm px-4">
       <Container fluid>
-        <Navbar.Brand className="fw-bold text-danger">ADMIN</Navbar.Brand>
-
+        <Navbar.Brand className="fw-bold text-danger">
+          {user.Role === "admin" ? "ADMIN" : "ZAPOSLENIK"}
+        </Navbar.Brand>
         {/* Hamburger za male ekrane */}
         <div className="d-lg-none ms-auto">
           <Button variant="light" onClick={() => setShowDropdown(!showDropdown)}>

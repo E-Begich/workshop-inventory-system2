@@ -1,6 +1,8 @@
 const { TABLOCKX } = require('sequelize/lib/table-hints')
 const db = require('../models')
 const { logChange } = require('./warehouseChangeController');
+const { Op } = require("sequelize");
+
 
 
 //creating main models
@@ -460,6 +462,36 @@ const generateOfferPDF = async (req, res) => {
     }
 };
 
+// Aktivne ponude
+const getActiveOffers = async (req, res) => {
+  try {
+    const offers = await Offer.findAll({
+      where: {
+        DateEnd: { [Op.gte]: new Date() }
+      }
+    });
+    res.json(offers);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greška pri dohvaćanju aktivnih ponuda" });
+  }
+};
+
+// Arhivirane ponude
+const getArhivedOffers = async (req, res) => {
+  try {
+    const offers = await Offer.findAll({
+      where: {
+        DateEnd: { [Op.lt]: new Date() }
+      }
+    });
+    res.json(offers);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greška pri dohvaćanju arhiviranih ponuda" });
+  }
+};
+
 
 
 module.exports = {
@@ -470,5 +502,7 @@ module.exports = {
     deleteOffer,
     generateOfferPDF,
     getOfferWithDetails,
-    createOfferWithItems
+    createOfferWithItems,
+    getActiveOffers,
+    getArhivedOffers
 }
