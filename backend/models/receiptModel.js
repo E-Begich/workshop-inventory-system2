@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'RESTRICT',
     },
     PaymentMethod: {
-      type: DataTypes.ENUM('Gotovina', 'Kartica'),
+      type: DataTypes.ENUM('Gotovina', 'Kartica', 'Po ponudi'),
       allowNull: true, // ili false, ovisno o tvojoj potrebi
     },
   }, {

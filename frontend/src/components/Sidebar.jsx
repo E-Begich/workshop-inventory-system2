@@ -50,17 +50,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </Link>
           </li>
 
-          <li className="nav-item mb-2">
-            <Link to="/getAllMaterial" className="nav-link text-white">
+                    <li className="nav-item mb-2">
+            <Link to="/getAllSupplier" className="nav-link text-white">
               <i className="fas fa-folder me-2" />
-              Materijali
+              Dobavljači
             </Link>
           </li>
 
           <li className="nav-item mb-2">
-            <Link to="/getAllSupplier" className="nav-link text-white">
+            <Link to="/getAllMaterial" className="nav-link text-white">
               <i className="fas fa-folder me-2" />
-              Dobavljači
+              Materijali
             </Link>
           </li>
 

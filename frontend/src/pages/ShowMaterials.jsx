@@ -118,19 +118,19 @@ const ShowMaterials = () => {
       showError('Unesite minimalnu količinu koja smije biti u skladištu.');
       return false;
     }
-        if (!data.PurchasePrice) {
+    if (!data.PurchasePrice) {
       showError('Odaberite nabavnu cijenu bez PDV');
       return false;
     }
-        if (!data.SellingPrice) {
+    if (!data.SellingPrice) {
       showError('Odaberite prodajnu cijenu bez PDV.');
       return false;
     }
-        if (!data.ID_supplier) {
+    if (!data.ID_supplier) {
       showError('Odaberite dobavljača.');
       return false;
     }
-        if (!data.TypeChange) {
+    if (!data.TypeChange) {
       showError('Odaberite uvrstu promjene.');
       return false;
     }
@@ -325,7 +325,7 @@ const ShowMaterials = () => {
       </div>
 
       <div className="table-responsive">
-        <Table striped bordered hover size="sm" className="mb-3">
+        <Table striped bordered hover size="sm" className="mb-3" style={{ minWidth: "1300px" }}>
           <thead>
             <tr>
               {[
@@ -389,23 +389,6 @@ const ShowMaterials = () => {
         </Table>
       </div>
 
-      <div className="mt-2 fw-bold text-end">
-        <div>
-          Ukupna nabavna cijena (prikazano): {
-            currentMaterials.reduce((acc, mat) =>
-              acc + parseFloat(mat.PurchasePrice || 0) * parseFloat(mat.Amount || 0), 0
-            ).toFixed(2)
-          } €
-        </div>
-        <div>
-          Ukupna prodajna cijena (prikazano): {
-            currentMaterials.reduce((acc, mat) =>
-              acc + parseFloat(mat.SellingPrice || 0) * parseFloat(mat.Amount || 0), 0
-            ).toFixed(2)
-          } €
-        </div>
-      </div>
-
 
       {/* PAGINACIJA */}
       <div className="row align-items-center mt-3 px-2">
@@ -430,6 +413,23 @@ const ShowMaterials = () => {
           >
             Sljedeća
           </Button>
+        </div>
+      </div>
+
+      <div className="mt-2 fw-bold text-start">
+        <div>
+          Ukupna nabavna cijena (prikazano): {
+            currentMaterials.reduce((acc, mat) =>
+              acc + parseFloat(mat.PurchasePrice || 0) * parseFloat(mat.Amount || 0), 0
+            ).toFixed(2)
+          } €
+        </div>
+        <div>
+          Ukupna prodajna cijena (prikazano): {
+            currentMaterials.reduce((acc, mat) =>
+              acc + parseFloat(mat.SellingPrice || 0) * parseFloat(mat.Amount || 0), 0
+            ).toFixed(2)
+          } €
         </div>
       </div>
 
