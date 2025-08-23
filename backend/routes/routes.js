@@ -72,6 +72,10 @@ router.get('/getOneChange/:ID_change', authMiddleware, warehouseChangeController
 router.put('/updateChange/:ID_change', authMiddleware, warehouseChangeController.updateChange);
 router.delete('/deleteChange/:ID_change', authMiddleware, warehouseChangeController.deleteChange);
 
+router.get('/getActivityLogs', authMiddleware, warehouseChangeController.getActivityLogs);
+
+
+
 //Table Receipt
 router.post('/addReceipt', authMiddleware, receiptController.addReceipt);
 router.get('/getAllReceipt', authMiddleware, receiptController.getAllReceipt);
@@ -85,8 +89,6 @@ router.get('/generateReceiptPDF/:ID_receipt', authMiddleware, receiptController.
 router.get('/getReceiptWithDetails/:ID_receipt', authMiddleware, receiptController.getReceiptWithDetails);
 router.get("/getMonthlySales", authMiddleware, receiptController.getMonthlySales);
 router.get("/getTopMaterials", authMiddleware, receiptController.getTopMaterials);
-
-
 
 
 //Table ReceiptItems

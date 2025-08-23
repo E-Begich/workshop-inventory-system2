@@ -151,6 +151,27 @@ const getAllChanges = async (req, res) => {
   }
 };
 
+const getActivityLogs = async (req, res) => {
+  try {
+    const logs = await WarehouseChange.findAll({
+      include: [
+        {
+          model: User,
+          as: 'User', // ovo mora biti točno kao u associate
+          attributes: ['ID_user', 'Name'] // ovdje stavi stvarno ime kolone u bazi
+        }
+      ],
+      order: [['ChangeDate', 'DESC']],
+      limit: 5
+    });
+    res.json(logs);
+  } catch (err) {
+    console.error("Greška kod dohvaćanja activity logova:", err);
+    res.status(500).json({ error: 'Greška na serveru' });
+  }
+};
+
+
 module.exports = {
   addChange,
   getAllChange,
@@ -158,5 +179,6 @@ module.exports = {
   updateChange,
   deleteChange,
   logChange,
-  getAllChanges
+  getAllChanges,
+  getActivityLogs
 }

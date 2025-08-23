@@ -27,6 +27,7 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   const [clients, setClients] = useState([]);
+  const [logs, setLogs] = useState([]);
 
   useEffect(() => {
     fetch("/api/aplication/getAllReceipt", {
@@ -188,8 +189,11 @@ const HomePage = () => {
         console.log("Podaci za graf:", data);
         if (!Array.isArray(data)) return;
 
-        const labels = data.map(item => `${item.month}.${item.year}`);
-        const totals = data.map(item => Number(item.total));
+        // uzmi zadnja 3 mjeseca
+        const lastMonths = data.slice(-3);
+
+        const labels = lastMonths.map(item => `${item.month} - ${item.year}`);
+        const totals = lastMonths.map(item => Number(item.total));
 
         setChartData({
           labels: labels,
@@ -282,6 +286,19 @@ const HomePage = () => {
     fontSize: "0.5em",
     color: "gray" // opcionalno
   };
+
+  useEffect(() => {
+    fetch("/api/aplication/getActivityLogs", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setLogs(data))
+      .catch((err) =>
+        console.error("Greška kod dohvata activity logova:", err)
+      );
+  }, []);
 
   return (
     <Container fluid className="p-4">
@@ -418,12 +435,42 @@ const HomePage = () => {
         <Col md={6}>
           <Card className="shadow-sm mb-4">
             <Card.Body>
-              <h5>Activity log</h5>
-              <ul className="list-group">
-                <li className="list-group-item">📌 Dodan račun #123 - Ivan Horvat</li>
-                <li className="list-group-item">📦 Skinuto 5m kože sa skladišta</li>
-                <li className="list-group-item">📝 Nova ponuda za Petra Petrovića</li>
-              </ul>
+              <h5>Activity Log</h5>
+              <Table hover responsive>
+                <thead>
+                  <tr>
+                    <th>Korisnik</th>
+                    <th>Akcija</th>
+                    <th>Objekt</th>
+                    <th>Datum</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.length > 0 ? (
+                    logs.map((c) => (
+                      <tr key={c.ID_change}>
+                        <td>{c.User?.Name || c.User?.Username || c.ID_user}</td>
+                        <td>{c.ActionType}</td>
+                        <td>{c.EntityName || c.ObjectType}</td>
+                        <td>{new Date(c.ChangeDate).toLocaleString()}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="text-center">
+                        Nema aktivnosti
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={() => navigate("/showWarehouseChange")}
+              >
+                Pogledaj sve
+              </Button>
             </Card.Body>
           </Card>
         </Col>
