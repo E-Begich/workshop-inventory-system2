@@ -88,7 +88,7 @@ const ShowOffer = () => {
         try {
             const res = await api.get('/aplication/getTypeItemEnum');
             setTypeEnum(res.data);
-              //console.log(res.data)
+            //console.log(res.data)
         } catch (error) {
             console.error('Greška pri dohvaćanju', error);
 
@@ -205,14 +205,19 @@ const ShowOffer = () => {
             // console.log(offerData);
 
             // Kreiraj ponudu i dohvati ID
-             console.log(offerData)
+            console.log(offerData)
             const res = await api.post('/aplication/addOffer', offerData);
             const createdOfferId = res.data.ID_offer;
 
             // Pripremi stavke
             const itemsToSend = offerItems.map(item => ({
-                ...item,
-                Tax: item.Tax ?? 25,
+                TypeItem: item.TypeItem,
+                ID_material: item.ID_material || null,
+                ID_service: item.ID_service || null,
+                Amount: item.Amount,
+                PriceNoTax: item.PriceNoTax,
+                Tax: item.Tax,
+                PriceTax: item.PriceTax,
                 ID_offer: createdOfferId,
             }));
             // console.log("Items to send:", itemsToSend);

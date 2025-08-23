@@ -28,15 +28,15 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.NOW,
     },
     PriceNoTax: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     Tax: {
-      type: DataTypes.DECIMAL(5, 2), // npr. 25.00 za 25%
+      type: DataTypes.DECIMAL(12, 2), // npr. 25.00 za 25%
       allowNull: false,
     },
     PriceTax: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     ID_offer: {

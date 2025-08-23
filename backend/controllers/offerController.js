@@ -173,9 +173,13 @@ const createOfferWithItems = async (req, res) => {
         for (let item of items) {
             await OfferItems.create({
                 ID_offer: offer.ID_offer,
-                Description: item.Description,
-                Quantity: item.Quantity,
-                Price: item.Price
+                TypeItem: item.TypeItem,
+                ID_material: item.ID_material || null,
+                ID_service: item.ID_service || null,
+                Amount: item.Amount,        // <-- ovdje se mapira frontend Amount
+                PriceNoTax: item.PriceNoTax,
+                Tax: item.Tax,
+                PriceTax: item.PriceTax,
             }, { transaction: t });
         }
 
