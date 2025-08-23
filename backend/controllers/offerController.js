@@ -43,7 +43,7 @@ const addOffer = async (req, res) => {
         // Logiranje kreiranja ponude
         await logChange({
             userId: ID_user,
-            actionType: 'kreirana_ponuda',
+            actionType: 'Kreirana ponuda',
             objectType: 'Ponuda',
             objectId: newOffer.ID_offer,
             offerNumber: newOffer.ID_offer,   // <-- ako imaš polje OfferNumber
@@ -72,7 +72,8 @@ const getOneOffer = async (req, res) => {
     res.status(200).send(offer)
 }
 
-//4. update user over id
+//4. update offer over id
+//ovo za sada ne treba
 const updateOffer = async (req, res) => {
     let ID_offer = req.params.ID_offer
     const offer = await Offer.update(req.body, { where: { ID_offer: ID_offer } })
@@ -80,7 +81,7 @@ const updateOffer = async (req, res) => {
     // Logiranje izmjene ponude
     await logChange({
         userId: ID_user,
-        actionType: 'ispravak',
+        actionType: 'Uređena ponuda',
         objectType: 'Ponuda',
         objectId: newOffer.ID_offer,
         offerNumber: newOffer.ID_offer,   // <-- ako imaš polje OfferNumber
@@ -105,7 +106,7 @@ const deleteOffer = async (req, res) => {
 
     await logChange({
       userId: ID_user,
-      actionType: "obrisana_ponuda",
+      actionType: "Obrisana ponuda",
       objectType: "Ponuda",
       objectId: offer.ID_offer,
       offerNumber: offer.ID_offer,
@@ -182,6 +183,7 @@ const createOfferWithItems = async (req, res) => {
         await t.commit();
 
         // Logiranje kreiranja ponude s artiklima
+        //trenutno ne treba
         await logChange({
             userId: ID_user,
             actionType: 'kreirana_ponuda_s_artiklima',

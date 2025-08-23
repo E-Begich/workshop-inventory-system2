@@ -37,7 +37,7 @@ const addMaterial = async (req, res) => {
     // Logiranje kreiranja materijala
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'dodano',            // tip akcije
+      actionType: 'Dodan novi materijal',            // tip akcije
       objectType: 'Materijal',
       objectId: material.ID_material,
       materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName
@@ -88,7 +88,7 @@ const updateMaterial = async (req, res) => {
     // Logiranje promjene
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'ispravak',            // tip akcije
+      actionType: 'Uređen materijal',            // tip akcije
       objectType: 'Materijal',
       objectId: material.ID_material,
       materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName
@@ -123,7 +123,7 @@ const deleteMaterial = async (req, res) => {
     // Logiranje brisanja
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'uklonjeno_sa_skladista',            // tip akcije
+      actionType: 'Obrisan materijal',            // tip akcije
       objectType: 'Materijal',
       objectId: material.ID_material,
       materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName

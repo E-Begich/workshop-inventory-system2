@@ -34,7 +34,7 @@ const addSupplier = async (req, res) => {
     // Logiranje kreiranja dobavljača
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'dodano',
+      actionType: 'Dodan novi dobavljač',
       objectType: 'Dobavljac',
       objectId: supplier.ID_supplier,
       supplierName: supplier.Name || supplier.ContactName, // prikazni naziv
@@ -83,7 +83,7 @@ const updateSupplier = async (req, res) => {
     // Logiranje promjene
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'uređivanje_dobavljača',
+      actionType: 'Uređivanje dobavljača',
       objectType: 'Dobavljac',
       objectId: ID_supplier,
       supplierName: updatedSupplier.Name || updatedSupplier.ContactName,
@@ -116,7 +116,7 @@ const deleteSupplier = async (req, res) => {
     // Logiranje brisanja
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'brisanje_dobavljaca',
+      actionType: 'Brisanje dobavljača',
       objectType: 'Dobavljac',
       objectId: ID_supplier,
       supplierName: supplier.Name || supplier.ContactName,

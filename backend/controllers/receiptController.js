@@ -54,7 +54,7 @@ const addReceipt = async (req, res) => {
     // Logiranje kreiranja računa
     await logChange({
       userId: req.body.ID_user,
-      actionType: 'kreiran_racun',
+      actionType: 'Kreiran račun',
       objectType: 'Racun',
       objectId: receipt.ID_receipt,
       receiptNumber: receipt.ReceiptNumber,  // ovo će biti EntityName
@@ -69,13 +69,13 @@ const addReceipt = async (req, res) => {
 };
 
 
-// 2. Gets all users from table
+// 2. Gets all receipts from table
 const getAllReceipt = async (req, res) => {
   let receipt = await Receipt.findAll({})
   res.send(receipt)
 }
 
-//3. Get one user over id
+//3. Get one receipt over id
 const getOneReceipt = async (req, res) => {
 
   let ID_receipt = req.params.ID_receipt
@@ -99,7 +99,7 @@ const updateReceipt = async (req, res) => {
     // Logiranje izmjene računa
     await logChange({
       userId: req.body.ID_user,
-      actionType: 'izmijenjen_racun',
+      actionType: 'Uređen račun',
       objectType: 'Racun',
       objectId: receipt.ID_receipt,
       receiptNumber: receipt.ReceiptNumber,
@@ -129,7 +129,7 @@ const deleteReceipt = async (req, res) => {
     // Logiranje brisanja računa
     await logChange({
       userId: req.body.ID_user,
-      actionType: 'obrisan_racun',
+      actionType: 'Obrisan račun',
       objectType: 'Racun',
       objectId: receipt.ID_receipt,
       receiptNumber: receipt.ReceiptNumber,
@@ -219,7 +219,7 @@ const createReceiptFromOffer = async (req, res) => {
 
     await logChange({
       userId: ID_user,
-      actionType: 'kreiran_racun',
+      actionType: 'Kreiran račun iz ponude',
       objectType: 'Racun',
       objectId: receipt.ID_receipt,
       receiptNumber: receipt.ReceiptNumber,

@@ -35,13 +35,13 @@ const addClient = async (req, res) => {
         // Logiranje kreiranja klijenta
         await logChange({
             userId: req.user.ID_user,
-            actionType: 'dodavanje_klijenta',
+            actionType: 'Dodan klijent',
             objectType: 'Klijent',
             objectId: client.ID_client,
             clientType: client.TypeClient,
             clientName: client.Name,
             clientContactName: client.ContactName,
-            note: `Dodani klijent: ${client.TypeClient === 'Tvrtka' ? client.Name : client.ContactName}.`
+            note: `Dodan klijent: ${client.TypeClient === 'Tvrtka' ? client.Name : client.ContactName}.`
         });
 
         res.status(200).send(client)
@@ -82,7 +82,7 @@ const updateClient = async (req, res) => {
         // logiraj promjenu
         await logChange({
             userId: req.user.ID_user,
-            actionType: 'uređivanje_klijenta',
+            actionType: 'Uređivanje klijenta',
             objectType: 'Klijent',
             objectId: client.ID_client,
             clientType: client.TypeClient,
@@ -112,7 +112,7 @@ const deleteClient = async (req, res) => {
         // logiraj brisanje prije nego što ga obrišeš
         await logChange({
             userId: req.user.ID_user,
-            actionType: 'brisanje_klijenta',
+            actionType: 'Brisanje klijenta',
             objectType: 'Klijent',
             objectId: client.ID_client,
             clientType: client.TypeClient,

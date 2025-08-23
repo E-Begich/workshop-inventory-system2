@@ -24,21 +24,22 @@ module.exports = (sequelize, DataTypes) => {
     },
     ActionType: {
       type: DataTypes.ENUM(
-        'dodano', //ovo trebam ispraviti + sve u ispisu ispraviti
-        'uklonjeno',
-        'inventura',
-        'ispravak',
-        'kreirana_ponuda',
-        'obrisana_ponuda',
-        'kreiran_racun',
-        'dodano_na_skladiste',
-        'uklonjeno_sa_skladista',
-        'dodavanje_klijenta',
-        'uređivanje_klijenta',
-        'brisanje_klijenta',
-        'dodavanje_dobavljaca',
-        'uređivanje_dobavljača',
-        'brisanje_dobavljaca'
+        'Dodan novi materijal', //ovo trebam ispraviti + sve u ispisu ispraviti
+        'Uređen materijal',
+        'Obrisan materijal',
+        'Kreirana ponuda',
+        'Uređena ponuda',
+        'Obrisana ponuda',
+        'Kreiran račun iz ponude',
+        'Kreiran račun',
+        'Uređen račun',
+        'Obrisan račun',
+        'Dodan novi dobavljač',
+        'Uređivanje dobavljača',
+        'Brisanje dobavljača',
+        'Dodan klijent',
+        'Uređivanje klijenta',
+        'Brisanje klijenta'
       ),
       allowNull: false,
     },
