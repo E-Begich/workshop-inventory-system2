@@ -3,6 +3,7 @@ import { Modal, Button, Form, Table, InputGroup, FormControl } from 'react-boots
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../api/api';
+import { jwtDecode } from "jwt-decode";
 
 const ShowService = () => {
     const [selectedServiceId, setSelectedServiceId] = useState(null);
@@ -123,6 +124,19 @@ const ShowService = () => {
         setShowModal(true);
     };
 
+    //za provjeru uloge
+    const token = localStorage.getItem("token");
+    let currentUser = null;
+
+    if (token) {
+        try {
+            currentUser = jwtDecode(token); // jwtDecode, ne jwt_decode
+            // console.log("currentUser iz tokena:", currentUser); za provjeru ispisa uloge
+        } catch (err) {
+            console.error("Nevažeći token", err);
+        }
+    }
+
     const sortedService = [...service].filter((m) =>
         m.Name.toLowerCase().includes(searchName.toLowerCase())
     );
@@ -159,21 +173,27 @@ const ShowService = () => {
                     <h2 className="mb-0">Usluge</h2>
                 </div>
                 <div className="col-12 col-md-auto mt-2 mt-md-0 text-md-end">
-                    <Button
-                        variant="danger" onClick={() => {
-                            setFormData({
-                                Name: '',
-                                Description: '',
-                                PriceNoTax: '',
-                                Tax: '', // može biti automatski 25%
-                                PriceTax: '',
-                            });
-                            setIsEditing(false);
-                            setShowModal(true);
-                        }}
-                    >
-                        Dodaj uslugu
-                    </Button>
+                    {currentUser.Role === 'admin' ? (
+                        <Button
+                            variant="danger" onClick={() => {
+                                setFormData({
+                                    Name: '',
+                                    Description: '',
+                                    PriceNoTax: '',
+                                    Tax: '', // može biti automatski 25%
+                                    PriceTax: '',
+                                });
+                                setIsEditing(false);
+                                setShowModal(true);
+                            }}
+                        >
+                            Dodaj uslugu
+                        </Button>
+                    ) : (
+                        <Button variant="danger" disabled>
+                            Dodaj uslugu
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -230,11 +250,12 @@ const ShowService = () => {
                                 <td>{mat.PriceTax} €</td>
 
                                 <td style={{ whiteSpace: 'nowrap' }}>
-                                    <Button variant="warning" size="sm" className="me-2" onClick={() => openEditModal(mat)}>Uredi</Button>
+                                    <Button variant="warning" size="sm" className="me-2" onClick={() => openEditModal(mat)} disabled={currentUser?.Role !== 'admin'}>Uredi</Button>
                                     <Button variant="danger" size="sm" onClick={() => {
                                         setDeleteId(mat.ID_service);
                                         setShowDeleteConfirm(true);
-                                    }}>
+                                    }}disabled={currentUser?.Role !== 'admin'}
+                                    >
                                         Obriši
                                     </Button>
                                 </td>

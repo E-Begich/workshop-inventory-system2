@@ -205,7 +205,7 @@ const ShowOffer = () => {
             // console.log(offerData);
 
             // Kreiraj ponudu i dohvati ID
-            console.log(offerData)
+            //console.log(offerData)
             const res = await api.post('/aplication/addOffer', offerData);
             const createdOfferId = res.data.ID_offer;
 

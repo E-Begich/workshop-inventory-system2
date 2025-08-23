@@ -130,11 +130,27 @@ const updateUser = async (req, res) => {
 
 //5. delete user by id
 const deleteUser = async (req, res) => {
+    try {
+        const { ID_user } = req.params;
 
-    let ID_user = req.params.ID_user
-    await User.destroy({ where: { ID_user: ID_user } })
-    res.send('Profil zaposlenika je obrisan!')
-}
+        // Provjera povezanih zapisa
+        const offers = await Offer.count({ where: { ID_user } });
+        const receipts = await Receipt.count({ where: { ID_user } });
+        const changes = await WarehouseChange.count({ where: { ID_user } });
+
+        if (offers > 0 || receipts > 0 || changes > 0) {
+            return res.status(400).json({
+                message: 'Korisnik ima povezane zapise i ne može se obrisati'
+            });
+        }
+
+        await User.destroy({ where: { ID_user } });
+        res.json({ message: 'Profil zaposlenika je obrisan!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Greška pri brisanju korisnika', error: err.message });
+    }
+};
 
 // 6. Get enum values for Role
 const getRoleEnum = (req, res) => {

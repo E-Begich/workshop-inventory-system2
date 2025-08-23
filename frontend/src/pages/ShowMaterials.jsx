@@ -3,6 +3,7 @@ import { Modal, Button, Form, Table, InputGroup, FormControl } from 'react-boots
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../api/api';
+import { jwtDecode } from "jwt-decode";
 
 
 const ShowMaterials = () => {
@@ -152,9 +153,6 @@ const ShowMaterials = () => {
     return errorToastId;
   };
 
-
-
-
   const handleAddMaterial = async () => {
     if (!validateForm(formData)) return;
 
@@ -181,7 +179,6 @@ const ShowMaterials = () => {
       toast.error('Greška prilikom dodavanja!');
     }
   };
-
 
   const handleEditMaterial = async () => {
     if (!validateForm(formData)) return;
@@ -211,7 +208,6 @@ const ShowMaterials = () => {
       toast.error('Greška prilikom uređivanja!');
     }
   };
-
 
   const handleDelete = async () => {
     try {
@@ -243,6 +239,19 @@ const ShowMaterials = () => {
     });
     setShowModal(true);
   };
+
+      //za provjeru uloge
+      const token = localStorage.getItem("token");
+      let currentUser = null;
+  
+      if (token) {
+          try {
+              currentUser = jwtDecode(token); // jwtDecode, ne jwt_decode
+             // console.log("currentUser iz tokena:", currentUser); za provjeru ispisa uloge
+          } catch (err) {
+              console.error("Nevažeći token", err);
+          }
+      }
 
   const sortedMaterials = [...materials].filter((m) =>
     m.NameMaterial.toLowerCase().includes(searchNaziv.toLowerCase()) &&
@@ -375,11 +384,11 @@ const ShowMaterials = () => {
                 <td>{(parseFloat(mat.PurchasePrice) * parseFloat(mat.Amount)).toFixed(2)} €</td>
                 <td>{(parseFloat(mat.SellingPrice) * parseFloat(mat.Amount)).toFixed(2)} €</td>
                 <td style={{ whiteSpace: 'nowrap' }}>
-                  <Button variant="warning" size="sm" className="me-2" onClick={() => openEditModal(mat)}>Uredi</Button>
+                  <Button variant="warning" size="sm" className="me-2" onClick={() => openEditModal(mat)} disabled={currentUser?.Role !== 'admin'}>Uredi</Button>
                   <Button variant="danger" size="sm" onClick={() => {
                     setDeleteId(mat.ID_material);
                     setShowDeleteConfirm(true);
-                  }}>
+                  }} disabled={currentUser?.Role !== 'admin'}>
                     Obriši
                   </Button>
                 </td>

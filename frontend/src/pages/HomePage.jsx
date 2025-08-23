@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Table, Button } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
@@ -10,295 +9,235 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 const HomePage = () => {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [revenueChange, setRevenueChange] = useState(0);
-
   const [totalReceipts, setTotalReceipts] = useState(0);
   const [lastWeekReceipts, setLastWeekReceipts] = useState(0);
-
   const [activeOffers, setActiveOffers] = useState(0);
   const [expiringSoon, setExpiringSoon] = useState(0);
-
   const [totalMaterials, setTotalMaterials] = useState(0);
   const [lowStock, setLowStock] = useState(0);
-
-  const [chartData, setChartData] = useState();
+  const [chartData, setChartData] = useState(null);
   const [topMaterialsData, setTopMaterialsData] = useState(null);
-
   const [receipts, setReceipts] = useState([]);
-  const navigate = useNavigate();
-
   const [clients, setClients] = useState([]);
   const [logs, setLogs] = useState([]);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("/api/aplication/getAllReceipt", {
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (!Array.isArray(data)) return;
-
-        const now = new Date();
-        const thisMonth = now.getMonth();
-        const thisYear = now.getFullYear();
-
-        const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const lastMonth = lastMonthDate.getMonth();
-        const lastMonthYear = lastMonthDate.getFullYear();
-
-        const parseAmount = str => parseFloat(str.replace(',', '.'));
-
-        const thisMonthReceipts = data.filter(r => {
-          const date = new Date(r.DateCreate);
-          return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
-        });
-
-        const lastMonthReceipts = data.filter(r => {
-          const date = new Date(r.DateCreate);
-          return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
-        });
-
-        const totalThisMonth = thisMonthReceipts.reduce((acc, r) => acc + parseAmount(r.PriceNoTax), 0);
-        const totalLastMonth = lastMonthReceipts.reduce((acc, r) => acc + parseAmount(r.PriceNoTax), 0);
-
-        setTotalRevenue(totalThisMonth);
-        setTotalReceipts(thisMonthReceipts.length);
-
-        const change = totalLastMonth === 0 ? 0 : ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100;
-        setRevenueChange(change);
+  const fetchReceipts = async () => {
+    try {
+      const res = await fetch("/api/aplication/getAllReceipt", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-  }, []);
+      const data = await res.json();
+      if (!Array.isArray(data)) return;
 
-  useEffect(() => {
-    fetch("/api/aplication/getAllReceipt", {
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        const today = new Date();
+      const now = new Date();
+      const thisMonth = now.getMonth();
+      const thisYear = now.getFullYear();
+      const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastMonth = lastMonthDate.getMonth();
+      const lastMonthYear = lastMonthDate.getFullYear();
 
-        // Funkcija koja vraća ponedjeljak trenutnog tjedna
-        const getMonday = (d) => {
-          const day = d.getDay();
-          const diff = (day === 0 ? -6 : 1) - day; // HR: ponedjeljak = 1, nedjelja = 0
-          const monday = new Date(d);
-          monday.setDate(d.getDate() + diff);
-          monday.setHours(0, 0, 0, 0);
-          return monday;
-        };
+      const parseAmount = str => parseFloat(str.replace(',', '.'));
 
-        const mondayThisWeek = getMonday(today);
-        const mondayLastWeek = new Date(mondayThisWeek);
-        mondayLastWeek.setDate(mondayThisWeek.getDate() - 7);
-        const sundayLastWeek = new Date(mondayThisWeek);
-        sundayLastWeek.setDate(mondayThisWeek.getDate() - 1);
-        sundayLastWeek.setHours(23, 59, 59, 999);
-
-        let currentWeekCount = 0;
-        let lastWeekCount = 0;
-
-        data.forEach(receipt => {
-          const date = new Date(receipt.DateCreate);
-          if (date >= mondayThisWeek) {
-            currentWeekCount++;
-          } else if (date >= mondayLastWeek && date <= sundayLastWeek) {
-            lastWeekCount++;
-          }
-        });
-
-        setTotalReceipts(currentWeekCount);
-        setLastWeekReceipts(lastWeekCount); // broj računa prošlog tjedna
+      const thisMonthReceipts = data.filter(r => {
+        const date = new Date(r.DateCreate);
+        return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
       });
-  }, []);
-
-
-  useEffect(() => {
-    fetch("/api/aplication/getAllOffer", {
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        // data je niz ponuda
-        const offers = Array.isArray(data) ? data : data.offers || [];
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        let active = 0;
-        let expiring = 0;
-
-        offers.forEach(offer => {
-          const hasReceipt = offer.HasReceipt; // true/false
-          const endDate = new Date(offer.DateEnd);
-          endDate.setHours(0, 0, 0, 0);
-
-          if (!hasReceipt && endDate >= today) {
-            active++;
-            const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-            if (diffDays <= 2) {
-              expiring++;
-            }
-          }
-        });
-
-        setActiveOffers(active);
-        setExpiringSoon(expiring);
-      })
-      .catch(err => {
-        console.error("Greška prilikom dohvata ponuda:", err);
+      const lastMonthReceipts = data.filter(r => {
+        const date = new Date(r.DateCreate);
+        return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
       });
-  }, []);
 
-  useEffect(() => {
-    fetch("/api/aplication/getAllMaterial", {
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log(data); // provjeri strukturu
+      const totalThisMonth = thisMonthReceipts.reduce((acc, r) => acc + parseAmount(r.PriceNoTax), 0);
+      const totalLastMonth = lastMonthReceipts.reduce((acc, r) => acc + parseAmount(r.PriceNoTax), 0);
 
-        const materials = Array.isArray(data) ? data : data.materials || [];
+      setTotalRevenue(totalThisMonth);
+      setTotalReceipts(thisMonthReceipts.length);
 
-        // Broj artikala = broj redova u tablici
-        setTotalMaterials(materials.length);
+      const change = totalLastMonth === 0 ? 0 : ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100;
+      setRevenueChange(change);
 
-        // Broj artikala pri isteku (Amount <= MinAmount)
-        const lowStockCount = materials.filter(m =>
-          parseFloat(m.Amount) <= parseFloat(m.MinAmount)
-        ).length;
+      // Računi za tjedan
+      const today = new Date();
+      const getMonday = (d) => {
+        const day = d.getDay();
+        const diff = (day === 0 ? -6 : 1) - day;
+        const monday = new Date(d);
+        monday.setDate(d.getDate() + diff);
+        monday.setHours(0,0,0,0);
+        return monday;
+      };
+      const mondayThisWeek = getMonday(today);
+      const mondayLastWeek = new Date(mondayThisWeek);
+      mondayLastWeek.setDate(mondayThisWeek.getDate() - 7);
+      const sundayLastWeek = new Date(mondayThisWeek);
+      sundayLastWeek.setDate(mondayThisWeek.getDate() - 1);
+      sundayLastWeek.setHours(23,59,59,999);
 
-        setLowStock(lowStockCount);
-      })
-      .catch(err => console.error("Greška kod dohvata materijala:", err));
-  }, []);
+      let currentWeekCount = 0, lastWeekCount = 0;
+      data.forEach(r => {
+        const date = new Date(r.DateCreate);
+        if (date >= mondayThisWeek) currentWeekCount++;
+        else if (date >= mondayLastWeek && date <= sundayLastWeek) lastWeekCount++;
+      });
+      setTotalReceipts(currentWeekCount);
+      setLastWeekReceipts(lastWeekCount);
 
-  useEffect(() => {
-    fetch("/api/aplication/getMonthlySales", {
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log("Podaci za graf:", data);
-        if (!Array.isArray(data)) return;
+      // Zadnjih 5 računa
+      const last5 = [...data].sort((a,b) => new Date(b.DateReceipt) - new Date(a.DateReceipt)).slice(0,5);
+      setReceipts(last5);
 
-        // uzmi zadnja 3 mjeseca
-        const lastMonths = data.slice(-3);
+    } catch (err) {
+      console.error("Greška pri dohvaćanju računa:", err);
+      setTotalRevenue(0);
+      setTotalReceipts(0);
+      setLastWeekReceipts(0);
+      setReceipts([]);
+    }
+  };
 
-        const labels = lastMonths.map(item => `${item.month} - ${item.year}`);
-        const totals = lastMonths.map(item => Number(item.total));
+  const fetchOffers = async () => {
+    try {
+      const res = await fetch("/api/aplication/getAllOffer", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      const offers = Array.isArray(data) ? data : data.offers || [];
+      const today = new Date();
+      today.setHours(0,0,0,0);
 
-        setChartData({
-          labels: labels,
-          datasets: [
-            {
-              label: "Prodaja (€)",
-              data: totals,
-              backgroundColor: "rgba(75,192,192,0.6)"
-            }
-          ]
-        });
-      })
-      .catch(err => console.error("Greška pri dohvaćanju podataka:", err));
-  }, []);
+      let active = 0, expiring = 0;
+      offers.forEach(o => {
+        const hasReceipt = o.HasReceipt;
+        const endDate = new Date(o.DateEnd);
+        endDate.setHours(0,0,0,0);
+        if (!hasReceipt && endDate >= today) {
+          active++;
+          const diffDays = Math.ceil((endDate - today)/(1000*60*60*24));
+          if (diffDays <= 2) expiring++;
+        }
+      });
+      setActiveOffers(active);
+      setExpiringSoon(expiring);
+    } catch (err) {
+      console.error("Greška pri dohvaćanju ponuda:", err);
+      setActiveOffers(0);
+      setExpiringSoon(0);
+    }
+  };
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "Mjesečna prodaja",
-      },
-    },
+  const fetchMaterials = async () => {
+    try {
+      const res = await fetch("/api/aplication/getAllMaterial", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      const materials = Array.isArray(data) ? data : data.materials || [];
+      setTotalMaterials(materials.length);
+      const lowStockCount = materials.filter(m => parseFloat(m.Amount) <= parseFloat(m.MinAmount)).length;
+      setLowStock(lowStockCount);
+    } catch(err) {
+      console.error("Greška kod materijala:", err);
+      setTotalMaterials(0);
+      setLowStock(0);
+    }
+  };
+
+  const fetchChartData = async () => {
+    try {
+      const res = await fetch("/api/aplication/getMonthlySales", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      if (!Array.isArray(data)) return;
+      const lastMonths = data.slice(-3);
+      const labels = lastMonths.map(i => `${i.month} - ${i.year}`);
+      const totals = lastMonths.map(i => Number(i.total));
+      setChartData({
+        labels,
+        datasets: [{
+          label: "Prodaja (€)",
+          data: totals,
+          backgroundColor: "rgba(75,192,192,0.6)"
+        }]
+      });
+    } catch(err) {
+      console.error("Greška kod mjesečne prodaje:", err);
+      setChartData(null);
+    }
+  };
+
+  const fetchTopMaterials = async () => {
+    try {
+      const res = await fetch("/api/aplication/getTopMaterials", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      const chartData = {
+        labels: data.map(m => m.NameMaterial),
+        datasets: [
+          { label: 'Minimalna količina', data: data.map(m=>m.MinAmount), backgroundColor: 'rgba(255,99,132,0.5)' },
+          { label: 'Stvarna količina', data: data.map(m=>m.Amount), backgroundColor: 'rgba(54,162,235,0.7)' }
+        ]
+      };
+      setTopMaterialsData(chartData);
+    } catch(err) {
+      console.error('Greška kod top materijala:', err);
+      setTopMaterialsData(null);
+    }
+  };
+
+  const fetchClients = async () => {
+    try {
+      const res = await fetch("/api/aplication/getAllClients", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      setClients(Array.isArray(data) ? data : []);
+    } catch(err) {
+      console.error("Greška kod klijenata:", err);
+      setClients([]);
+    }
+  };
+
+  const fetchLogs = async () => {
+    try {
+      const res = await fetch("/api/aplication/getActivityLogs", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      setLogs(Array.isArray(data) ? data : []);
+    } catch(err) {
+      console.error("Greška kod activity logova:", err);
+      setLogs([]);
+    }
   };
 
   useEffect(() => {
-    fetch("/api/aplication/getTopMaterials", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // Pretvaramo podatke u format za Chart.js
-        const chartData = {
-          labels: data.map((m) => m.NameMaterial),
-          datasets: [
-            {
-              label: 'Minimalna količina',
-              data: data.map((m) => m.MinAmount),
-              backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            },
-            {
-              label: 'Stvarna količina',
-              data: data.map((m) => m.Amount),
-              backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            },
-          ],
-        };
-        setTopMaterialsData(chartData);
-      })
-      .catch((err) => console.error('Greška kod dohvata top materijala:', err));
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/aplication/getAllReceipt", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        // sortiramo po datumu opadajuće i uzmemo samo 5
-        const last5 = data.sort((a, b) => new Date(b.DateReceipt) - new Date(a.DateReceipt)).slice(0, 5);
-        setReceipts(last5);
-      })
-      .catch(err => console.error("Greška kod dohvaćanja računa:", err));
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/aplication/getAllClients", {
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => setClients(data))
-      .catch(err => console.error(err));
+    fetchReceipts();
+    fetchOffers();
+    fetchMaterials();
+    fetchChartData();
+    fetchTopMaterials();
+    fetchClients();
+    fetchLogs();
   }, []);
 
   const getClientName = (id) => {
+    if (!Array.isArray(clients)) return 'Nepoznato';
     const client = clients.find(c => c.ID_client === id);
     return client ? (client.TypeClient === 'Tvrtka' ? client.Name : client.ContactName) : 'Nepoznato';
   };
 
-  const smallText = {
-    fontSize: "0.5em",
-    color: "gray" // opcionalno
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: "top" },
+      title: { display: true, text: "Mjesečna prodaja" }
+    }
   };
 
-  useEffect(() => {
-    fetch("/api/aplication/getActivityLogs", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setLogs(data))
-      .catch((err) =>
-        console.error("Greška kod dohvata activity logova:", err)
-      );
-  }, []);
+  const smallText = { fontSize: "0.5em", color: "gray" };
 
   return (
     <Container fluid className="p-4">

@@ -3,6 +3,7 @@ import { Modal, Button, Form, Table } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../api/api';
+import { jwtDecode } from "jwt-decode";
 
 const ShowUser = () => {
     const [selectedUserId, setSelectedUserId] = useState(null);
@@ -108,8 +109,6 @@ const ShowUser = () => {
         return errorToastId;
     };
 
-
-
     const handleAddUser = async () => {
         if (!validateForm(formData)) return;
 
@@ -131,7 +130,6 @@ const ShowUser = () => {
             toast.error('Greška prilikom dodavanja!');
         }
     };
-
 
     const handleEditUser = async () => {
         if (!validateForm(formData)) return;
@@ -156,17 +154,17 @@ const ShowUser = () => {
         }
     };
 
-    const handleDelete = async () => {
-        try {
-            await api.delete(`/aplication/deleteUser/${deleteId}`);
-            setShowDeleteConfirm(false);
-            fetchUsers();
-            toast.success('Korisnik je uspješno obrisan!');
-        } catch (error) {
-            console.error('Greška prilikom brisanja', error);
-            toast.error('Greška prilikom brisanja!');
-        }
-    };
+const handleDelete = async () => {
+    try {
+        const res = await api.delete(`/aplication/deleteUser/${deleteId}`);
+        setShowDeleteConfirm(false);
+        fetchUsers();
+        toast.success(res.data.message);
+    } catch (error) {
+        console.error('Greška prilikom brisanja', error);
+        toast.error(error.response?.data?.message || 'Greška prilikom brisanja!');
+    }
+};
 
     const openEditModal = (user) => {
         setIsEditing(true);
@@ -182,6 +180,18 @@ const ShowUser = () => {
         setShowModal(true);
     };
 
+    //za provjeru uloge
+    const token = localStorage.getItem("token");
+    let currentUser = null;
+
+    if (token) {
+        try {
+            currentUser = jwtDecode(token); // jwtDecode, ne jwt_decode
+           // console.log("currentUser iz tokena:", currentUser); za provjeru ispisa uloge
+        } catch (err) {
+            console.error("Nevažeći token", err);
+        }
+    }
 
     if (sortConfig.key) {
         sortedUsers.sort((a, b) => {
@@ -214,24 +224,32 @@ const ShowUser = () => {
                     <h2 className="mb-0">Korisnici - zaposlenici</h2>
                 </div>
                 <div className="col-12 col-md-auto mt-2 mt-md-0 text-md-end">
-                    <Button
-                        variant="danger" onClick={() => {
-                            setFormData({
-                                Name: '',
-                                Lastname: '',
-                                Email: '',
-                                Contact: '',
-                                Password: '',
-                                Role: ''
-                            })
-                            setIsEditing(false);
-                            setShowModal(true);
-                        }}
-                    >
-                        Dodaj korisnika
-                    </Button>
+                    {currentUser.Role === 'admin' ? (
+                        <Button
+                            variant="danger"
+                            onClick={() => {
+                                setFormData({
+                                    Name: '',
+                                    Lastname: '',
+                                    Email: '',
+                                    Contact: '',
+                                    Password: '',
+                                    Role: ''
+                                });
+                                setIsEditing(false);
+                                setShowModal(true);
+                            }}
+                        >
+                            Dodaj korisnika
+                        </Button>
+                    ) : (
+                        <Button variant="danger" disabled>
+                            Dodaj korisnika
+                        </Button>
+                    )}
                 </div>
             </div>
+
             <div className="table-responsive">
                 <Table striped bordered hover size="sm" className="mb-3">
                     <thead>
@@ -274,11 +292,24 @@ const ShowUser = () => {
                                 <td>{mat.Role}</td>
 
                                 <td style={{ whiteSpace: 'nowrap' }}>
-                                    <Button variant="warning" size="sm" className="me-2" onClick={() => openEditModal(mat)}>Uredi</Button>
-                                    <Button variant="danger" size="sm" onClick={() => {
-                                        setDeleteId(mat.ID_user);
-                                        setShowDeleteConfirm(true);
-                                    }}>
+                                    <Button
+                                        variant="warning"
+                                        size="sm"
+                                        className="me-2"
+                                        onClick={() => openEditModal(mat)}
+                                        disabled={currentUser?.Role !== 'admin'}
+                                    >
+                                        Uredi
+                                    </Button>
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        onClick={() => {
+                                            setDeleteId(mat.ID_user);
+                                            setShowDeleteConfirm(true);
+                                        }}
+                                        disabled={currentUser?.Role !== 'admin'}
+                                    >
                                         Obriši
                                     </Button>
                                 </td>

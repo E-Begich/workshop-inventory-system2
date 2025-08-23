@@ -16,15 +16,16 @@ const materialsController = require('../controllers/materialsController.js')
 
 const router = require('express').Router();
 const authMiddleware = require('../middlewares/authMiddleware');
+const authorize = require('../middlewares/authorize'); // putanja do authorize.js
 
 
 
 //Table User
-router.post('/addUser', authMiddleware, userController.addUser);
-router.get('/getAllUsers', userController.getAllUsers);
-router.get('/getOneUser/:ID_user', authMiddleware, userController.getOneUser);
-router.put('/updateUser/:ID_user', authMiddleware, userController.updateUser);
-router.delete('/deleteUser/:ID_user', authMiddleware, userController.deleteUser);
+router.post('/addUser', authMiddleware, authorize('User', 'create'), userController.addUser);
+router.get('/getAllUsers', authMiddleware, authorize('User', 'read'), userController.getAllUsers);
+router.get('/getOneUser/:ID_user', authMiddleware, authorize('User', 'read'), userController.getOneUser);
+router.put('/updateUser/:ID_user', authMiddleware, authorize('User', 'update'), userController.updateUser);
+router.delete('/deleteUser/:ID_user', authMiddleware, authorize('User', 'delete'), userController.deleteUser);
 
 router.get('/getRoleEnum', authMiddleware, userController.getRoleEnum);
 router.post('/login', userController.loginUser);
@@ -39,21 +40,21 @@ router.delete('/deleteClient/:ID_client', authMiddleware, clientController.delet
 router.get('/getTypeClientEnum', authMiddleware, clientController.getTypeClientEnum);
 
 //Table Service
-router.post('/addService', authMiddleware, serviceController.addService);
-router.get('/getAllService', authMiddleware, serviceController.getAllService);
-router.get('/getOneService/:ID_service', authMiddleware, serviceController.getOneService);
-router.put('/updateService/:ID_service', authMiddleware, serviceController.updateService);
-router.delete('/deleteService/:ID_service', authMiddleware, serviceController.deleteService);
+router.post('/addService', authMiddleware, authorize('Service', 'create'), serviceController.addService);
+router.get('/getAllService', authMiddleware, authorize('Service', 'read'), serviceController.getAllService);
+router.get('/getOneService/:ID_service', authMiddleware, authorize('Service', 'read'), serviceController.getOneService);
+router.put('/updateService/:ID_service', authMiddleware, authorize('Service', 'update'), serviceController.updateService);
+router.delete('/deleteService/:ID_service', authMiddleware, authorize('Service', 'delete'), serviceController.deleteService);
 
 //Table Offer
-router.post('/addOffer', authMiddleware, offerController.addOffer);
-router.get('/getAllOffer', authMiddleware, offerController.getAllOffer);
-router.get('/getOneOffer/:ID_offer', authMiddleware, offerController.getOneOffer);
-router.put('/updateOffer/:ID_offer', authMiddleware, offerController.updateOffer);
-router.delete('/deleteOffer/:ID_offer', authMiddleware, offerController.deleteOffer);
+router.post('/addOffer', authMiddleware, authorize('Offer', 'create'), offerController.addOffer);
+router.get('/getAllOffer', authMiddleware, authorize('Offer', 'read'), offerController.getAllOffer);
+router.get('/getOneOffer/:ID_offer', authMiddleware, authorize('Offer', 'read'), offerController.getOneOffer);
+router.put('/updateOffer/:ID_offer', authMiddleware, authorize('Offer', 'update'), offerController.updateOffer);
+router.delete('/deleteOffer/:ID_offer', authMiddleware, authorize('Offer', 'delete'), offerController.deleteOffer);
 
-router.get('/generateOfferPDF/:ID_offer', authMiddleware,offerController.generateOfferPDF);
-router.get('/getOfferWithDetails/:ID_offer', authMiddleware, offerController.getOfferWithDetails);
+router.get('/generateOfferPDF/:ID_offer', authMiddleware, authorize('Offer', 'read'), offerController.generateOfferPDF);
+router.get('/getOfferWithDetails/:ID_offer', authMiddleware, authorize('Offer', 'read'), offerController.getOfferWithDetails);
 
 // Table OfferItems
 router.post('/addOfferItems', authMiddleware, offerItemsController.addOfferItems);
@@ -116,6 +117,7 @@ router.get('/getAllMaterial', authMiddleware, materialsController.getAllMaterial
 router.get('/getOneMaterial/:ID_material', authMiddleware, materialsController.getOneMaterial);
 router.put('/updateMaterial/:ID_material', authMiddleware, materialsController.updateMaterial);
 router.delete('/deleteMaterial/:ID_material', authMiddleware, materialsController.deleteMaterial);
+
 
 
 router.get('/getLocationEnum', authMiddleware, materialsController.getLocationEnum);
