@@ -8,7 +8,7 @@ import api from '../api/api';
 //import { jwtDecode } from "jwt-decode";
 
 
-const ShowOffer = () => {
+const CreateOffer = () => {
     const [materials, setMaterials] = useState([]);
     const [service, setService] = useState([]);
     const [clients, setClients] = useState([]);
@@ -46,6 +46,13 @@ const ShowOffer = () => {
         fetchMaterials();
         fetchService();
         fetchTypeItem();
+
+        // Dohvati trenutno prijavljenog korisnika iz tokena
+        const token = localStorage.getItem('token');
+        if (token) {
+            const payload = JSON.parse(atob(token.split('.')[1])); // jednostavan JWT decode
+            setForm(prev => ({ ...prev, ID_user: payload.ID_user }));
+        }
     }, []);
 
     const fetchClients = async () => {
@@ -341,18 +348,30 @@ const ShowOffer = () => {
             {/* Zaposlenik i gumb u istoj liniji */}
             <div style={flexRowStyle}>
                 <label style={labelStyle}>Zaposlenik</label>
+{/*             <Form.Select  komentirano za slučaj da zatreba odabir zaposlenika pri izradi, za sada uzima automatski
+                style={selectStyle}
+                value={form.ID_user}
+                onChange={(e) => setForm({ ...form, ID_user: e.target.value })}
+            >
+                <option value="">Odaberi zaposlenika</option>
+                {users.map(c => (
+                    <option key={c.ID_user} value={c.ID_user}>
+                        {c.Name} {c.Lastname}
+                    </option>
+                ))}
+            </Form.Select> */}
                 <Form.Select
                     style={selectStyle}
                     value={form.ID_user}
-                    onChange={(e) => setForm({ ...form, ID_user: e.target.value })}
+                    disabled
                 >
-                    <option value="">Odaberi zaposlenika</option>
                     {users.map(c => (
                         <option key={c.ID_user} value={c.ID_user}>
                             {c.Name} {c.Lastname}
                         </option>
                     ))}
                 </Form.Select>
+
                 <Button variant="danger" style={{ whiteSpace: 'nowrap' }}>
                     <Link to="/getAllUsers" className="nav-link text-white">
                         Dodaj novog zaposlenika
@@ -695,4 +714,4 @@ const ShowOffer = () => {
     )
 }
 
-export default ShowOffer
+export default CreateOffer

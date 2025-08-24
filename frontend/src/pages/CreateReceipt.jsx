@@ -42,7 +42,20 @@ const CreateReceipt = () => {
         fetchServices();
         fetchTypeItem();
         fetchPayment();
+
+        // Dohvati trenutno prijavljenog korisnika iz tokena
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1])); // jednostavan JWT decode
+                setForm(prev => ({ ...prev, ID_user: payload.ID_user }));
+            } catch (err) {
+                console.error('Neuspjelo dekodiranje tokena', err);
+            }
+        }
     }, []);
+
+
     const fetchClients = async () => {
         try {
             const res = await api.get('/aplication/getAllClients');
@@ -401,7 +414,7 @@ const CreateReceipt = () => {
                     </Button>
                 </div>
                 {/* Zaposlenik i gumb u istoj liniji */}
-                <div style={flexRowStyle}>
+                {/*                 <div style={flexRowStyle}>
                     <Form.Label style={labelStyle}>Zaposlenik</Form.Label>
                     <Form.Select style={selectStyle} value={form.ID_user} onChange={e => setForm({ ...form, ID_user: e.target.value })}>
                         <option value="">Odaberi korisnika</option>
@@ -414,13 +427,31 @@ const CreateReceipt = () => {
                             Dodaj novog zaposlenika
                         </Link>
                     </Button>
+                </div> */}
+
+                <div style={flexRowStyle}>
+                    <Form.Label style={labelStyle}>Zaposlenik</Form.Label>
+                    <Form.Select style={selectStyle} value={form.ID_user} disabled>
+                        {users.map(c => (
+                            <option key={c.ID_user} value={c.ID_user}>
+                                {c.Name} {c.Lastname}
+                            </option>
+                        ))}
+                    </Form.Select>
+                    <Button variant="danger" style={{ whiteSpace: 'nowrap' }}>
+                        <Link to="/getAllUsers" className="nav-link text-white">
+                            Dodaj novog zaposlenika
+                        </Link>
+                    </Button>
                 </div>
+
                 <div style={flexRowStyle}>
                     <Form.Label style={labelStyle}>Datum</Form.Label>
                     <Form.Control
                         type="date"
                         value={form.DateCreate}
                         onChange={e => setForm({ ...form, DateCreate: e.target.value })}
+                        disabled
                     />
                 </div>
             </Row>
