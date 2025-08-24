@@ -4,13 +4,13 @@ const bcrypt = require('bcrypt');
 
 async function createAdmin() {
   try {
-    const passwordHash = await bcrypt.hash('admin123', 10); // lozinka za login
+    const passwordHash = await bcrypt.hash('21Prosinac1990@123', 10); // lozinka za login
 
     const adminUser = await db.User.create({
-      Name: 'Admin',
-      Lastname: 'Test',
+      Name: 'Emina',
+      Lastname: 'Begić',
       Contact: '00000000',
-      Email: 'admin@admin.com',
+      Email: 'begicema@gmail.com',
       Password: passwordHash,
       Role: 'admin' // ako imaš role
     });

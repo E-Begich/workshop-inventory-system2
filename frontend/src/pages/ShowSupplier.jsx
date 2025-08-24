@@ -225,33 +225,35 @@ const ShowSuppliers = () => {
   };
 
 
-  const sortedSuppliers = [...suppliers].filter((m) =>
-    m.Name.toLowerCase().includes(searchName.toLowerCase()) &&
-    m.ContactName.toLowerCase().includes(searchContactName.toLowerCase())
-  );
+ const sortedSuppliers = [...suppliers].filter((m) =>
+  (m.Name || "").toLowerCase().includes(searchName.toLowerCase()) &&
+  (m.ContactName || "").toLowerCase().includes(searchContactName.toLowerCase())
+);
 
-  if (sortConfig.key) {
-    sortedSuppliers.sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
-      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
+if (sortConfig.key) {
+  sortedSuppliers.sort((a, b) => {
+    const aVal = a[sortConfig.key] ?? ""; // fallback ako je null/undefined
+    const bVal = b[sortConfig.key] ?? "";
+
+    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+}
+
+const indexOfLast = currentPage * suppliersPerPage;
+const indexOfFirst = indexOfLast - suppliersPerPage;
+const currentSuppliers = sortedSuppliers.slice(indexOfFirst, indexOfLast);
+const totalPages = Math.ceil(sortedSuppliers.length / suppliersPerPage);
+
+const handleSort = (key) => {
+  let direction = "asc";
+  if (sortConfig.key === key && sortConfig.direction === "asc") {
+    direction = "desc";
   }
+  setSortConfig({ key, direction });
+};
 
-  const indexOfLast = currentPage * suppliersPerPage;
-  const indexOfFirst = indexOfLast - suppliersPerPage;
-  const currentSuppliers = sortedSuppliers.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(sortedSuppliers.length / suppliersPerPage);
-
-  const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
 
   return (
     <div className="container px-3 mt-4">

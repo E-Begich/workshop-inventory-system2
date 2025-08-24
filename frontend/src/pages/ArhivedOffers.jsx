@@ -1,55 +1,98 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Spinner } from "react-bootstrap";
 import { FaTrash } from "react-icons/fa";
+import api from "../api/api";
+import { toast } from "react-toastify";
 
 const ArhivedOffers = () => {
   const [offers, setOffers] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
 
-  const fetchArhivedOffers = async () => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/aplication/getArhivedOffers", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Greška pri dohvaćanju arhiviranih ponuda");
-      const data = await res.json();
-      setOffers(data);
+      const [offersRes, clientsRes, usersRes] = await Promise.all([
+        api.get("/aplication/getArhivedOffers"),
+        api.get("/aplication/getAllClients"),
+        api.get("/aplication/getAllUsers"),
+      ]);
+      setOffers(offersRes.data);
+      setClients(clientsRes.data);
+      setUsers(usersRes.data);
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError("Greška pri dohvaćanju arhiviranih ponuda");
     } finally {
       setLoading(false);
     }
   };
 
+  const getClientType = (id) => clients.find(c => c.ID_client === id)?.TypeClient || "Nepoznato";
+  const getClientName = (id) => {
+    const c = clients.find(c => c.ID_client === id);
+    if (!c) return "Nepoznato";
+    return c.TypeClient === "Tvrtka" ? c.Name : c.ContactName;
+  };
+  const getUserName = (id) => users.find(u => u.ID_user === id)?.Name || "Nepoznat";
+  const formatDate = (dateString) => {
+    const d = new Date(dateString);
+    return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`;
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm("Jeste li sigurni da želite obrisati ovu ponudu?")) return;
-
     try {
-      const res = await fetch(`/api/aplication/deleteOffer/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Greška pri brisanju ponude");
-
-      setOffers(offers.filter((offer) => offer.ID_offer !== id));
+      await api.delete(`/aplication/deleteOffer/${id}`);
+      setOffers(prev => prev.filter(offer => offer.ID_offer !== id));
+      toast.success("Ponuda obrisana.");
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      toast.error("Greška pri brisanju ponude.");
     }
   };
 
-  useEffect(() => {
-    fetchArhivedOffers();
-  }, []);
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") direction = "desc";
+    setSortConfig({ key, direction });
+  };
+
+  let sortedOffers = [...offers];
+  if (sortConfig.key) {
+    sortedOffers.sort((a, b) => {
+      let aVal, bVal;
+
+      switch(sortConfig.key){
+        case "Client.TypeClient":
+          aVal = getClientType(a.ID_client);
+          bVal = getClientType(b.ID_client);
+          break;
+        case "Client.Name":
+          aVal = getClientName(a.ID_client);
+          bVal = getClientName(b.ID_client);
+          break;
+        case "User.Name":
+          aVal = getUserName(a.ID_user);
+          bVal = getUserName(b.ID_user);
+          break;
+        default:
+          aVal = a[sortConfig.key];
+          bVal = b[sortConfig.key];
+      }
+
+      if(aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if(aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
 
   if (loading) return <Spinner animation="border" className="m-3" />;
   if (error) return <p className="text-danger">{error}</p>;
@@ -57,42 +100,42 @@ const ArhivedOffers = () => {
   return (
     <div className="container mt-4">
       <h2 className="mb-3">Arhivirane ponude</h2>
-      {offers.length === 0 ? (
+      {sortedOffers.length === 0 ? (
         <p className="text-muted">Nema arhiviranih ponuda.</p>
       ) : (
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Naziv</th>
-              <th>Klijent</th>
-              <th>Datum kreiranja</th>
-              <th>Vrijedi do</th>
+              {[
+                { label: "Broj ponude", key: "ID_offer" },
+                { label: "Vrsta klijenta", key: "Client.TypeClient" },
+                { label: "Klijent", key: "Client.Name" },
+                { label: "Datum kreiranja", key: "DateCreate" },
+                { label: "Datum isteka", key: "DateEnd" },
+                { label: "Cijena (s PDV)", key: "PriceTax" },
+                { label: "Ponudu kreirao", key: "User.Name" }
+              ].map(({label,key}) => (
+                <th key={key} style={{ cursor:"pointer"}} onClick={() => handleSort(key)}>
+                  {label} <span style={{ color: sortConfig.key === key ? "black":"#ccc" }}>
+                    {sortConfig.key === key ? (sortConfig.direction==="asc"?"▲":"▼"):"▲▼"}
+                  </span>
+                </th>
+              ))}
               <th>Akcije</th>
             </tr>
           </thead>
           <tbody>
-            {offers.map((offer) => (
-              <tr key={offer.ID_offer} className="text-muted" style={{ backgroundColor: "#f5f5f5" }}>
+            {sortedOffers.map(offer => (
+              <tr key={offer.ID_offer} className="text-muted" style={{backgroundColor:"#f5f5f5"}}>
                 <td>{offer.ID_offer}</td>
-                <td>{offer.Title}</td>
-                <td>{offer.ClientName}</td>
-                <td>{new Date(offer.CreatedAt).toLocaleDateString()}</td>
-                <td>{new Date(offer.ValidUntil).toLocaleDateString()}</td>
+                <td>{getClientType(offer.ID_client)}</td>
+                <td>{getClientName(offer.ID_client)}</td>
+                <td>{formatDate(offer.DateCreate)}</td>
+                <td>{formatDate(offer.DateEnd)}</td>
+                <td>{Number(offer.PriceTax).toFixed(2)} €</td>
+                <td>{getUserName(offer.ID_user)}</td>
                 <td>
-                  {/* disabled gumbi */}
-                  <Button variant="secondary" size="sm" disabled className="me-2">
-                    Pregled
-                  </Button>
-                  <Button variant="secondary" size="sm" disabled className="me-2">
-                    Uredi
-                  </Button>
-                  {/* jedini aktivan gumb */}
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(offer.ID_offer)}
-                  >
+                  <Button variant="danger" size="sm" onClick={() => handleDelete(offer.ID_offer)}>
                     <FaTrash /> Obriši
                   </Button>
                 </td>

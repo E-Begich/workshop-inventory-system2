@@ -230,33 +230,33 @@ const ShowClient = () => {
         setShowModal(true);
     };
 
-    const sortedClients = [...clients].filter((m) =>
-        m.Name.toLowerCase().includes(searchName.toLowerCase()) &&
-        m.ContactName.toLowerCase().includes(searchContactName.toLowerCase())
-    );
+const sortedClients = [...clients].filter((m) =>
+    (m.Name || "").toLowerCase().includes(searchName.toLowerCase()) &&
+    (m.ContactName || "").toLowerCase().includes(searchContactName.toLowerCase())
+);
 
-    if (sortConfig.key) {
-        sortedClients.sort((a, b) => {
-            const aVal = a[sortConfig.key];
-            const bVal = b[sortConfig.key];
-            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-            return 0;
-        });
+if (sortConfig.key) {
+    sortedClients.sort((a, b) => {
+        const aVal = a[sortConfig.key] ?? ""; // fallback ako je null/undefined
+        const bVal = b[sortConfig.key] ?? "";
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+const indexOfLast = currentPage * clientsPerPage;
+const indexOfFirst = indexOfLast - clientsPerPage;
+const currentClients = sortedClients.slice(indexOfFirst, indexOfLast);
+const totalPages = Math.ceil(sortedClients.length / clientsPerPage);
+
+const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+        direction = 'desc';
     }
-
-    const indexOfLast = currentPage * clientsPerPage;
-    const indexOfFirst = indexOfLast - clientsPerPage;
-    const currentClients = sortedClients.slice(indexOfFirst, indexOfLast);
-    const totalPages = Math.ceil(sortedClients.length / clientsPerPage);
-
-    const handleSort = (key) => {
-        let direction = 'asc';
-        if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({ key, direction });
-    };
+    setSortConfig({ key, direction });
+};
 
     return (
         <div className="container px-3 mt-4">

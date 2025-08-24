@@ -22,15 +22,17 @@ const ShowReceipt = () => {
         fetchUsers();
     }, []);
 
-    const fetchReceipts = async () => {
-        try {
-            const res = await api.get('/aplication/getAllReceipt');
-            setReceipts(res.data);
-        } catch (error) {
-            console.error('Greška pri dohvaćanju računa:', error);
-            toast.error('Ne mogu dohvatiti račune.');
-        }
-    };
+const fetchReceipts = async () => {
+    try {
+        const res = await api.get('/aplication/getAllReceipt');
+        // sortiraj po datumu kreiranja opadajuće (najnoviji prvi)
+        const sorted = res.data.sort((a, b) => new Date(b.DateCreate) - new Date(a.DateCreate));
+        setReceipts(sorted);
+    } catch (error) {
+        console.error('Greška pri dohvaćanju računa:', error);
+        toast.error('Ne mogu dohvatiti račune.');
+    }
+};
 
     const fetchClients = async () => {
         try {
@@ -89,15 +91,18 @@ const ShowReceipt = () => {
         );
     });
 
-    if (sortConfig.key) {
-        filteredReceipts.sort((a, b) => {
-            const aVal = a[sortConfig.key];
-            const bVal = b[sortConfig.key];
-            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-            return 0;
-        });
-    }
+if (sortConfig.key) {
+    filteredReceipts.sort((a, b) => {
+        const aVal = a[sortConfig.key];
+        const bVal = b[sortConfig.key];
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+} else {
+    // defaultno sortiraj po datumu kreiranja opadajuće
+    filteredReceipts.sort((a, b) => new Date(b.DateCreate) - new Date(a.DateCreate));
+}
 
     const indexOfLast = currentPage * receiptsPerPage;
     const indexOfFirst = indexOfLast - receiptsPerPage;

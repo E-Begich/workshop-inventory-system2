@@ -30,15 +30,19 @@ const ShowOffer = () => {
         fetchPayments();
     }, []);
 
-    const fetchOffers = async () => {
-        try {
-            const res = await api.get('/aplication/getAllOffer');
-            setOffers(res.data);
-        } catch (error) {
-            console.error(error);
-            toast.error('Ne mogu dohvatiti ponude.');
-        }
-    };
+const fetchOffers = async () => {
+    try {
+        const res = await api.get('/aplication/getAllOffer');
+        // filtriraj samo ponude koje još nisu istekle
+        const activeOffers = res.data.filter(o => new Date(o.DateEnd) >= new Date());
+        // sortiraj po datumu kreiranja opadajuće (nove prve)
+        const sorted = activeOffers.sort((a, b) => new Date(b.DateCreate) - new Date(a.DateCreate));
+        setOffers(sorted);
+    } catch (error) {
+        console.error(error);
+        toast.error('Ne mogu dohvatiti ponude.');
+    }
+};
 
     const fetchClients = async () => {
         try {
@@ -159,15 +163,19 @@ const ShowOffer = () => {
         getUserName(o.ID_user).toLowerCase().includes(searchUser.toLowerCase())
     );
 
-    if (sortConfig.key) {
-        filteredOffers.sort((a, b) => {
-            const aVal = a[sortConfig.key];
-            const bVal = b[sortConfig.key];
-            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-            return 0;
-        });
-    }
+ if (sortConfig.key) {
+    filteredOffers.sort((a, b) => {
+        const aVal = a[sortConfig.key];
+        const bVal = b[sortConfig.key];
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+} else {
+    // defaultno sortiraj po datumu opadajuće
+    filteredOffers.sort((a, b) => new Date(b.DateCreate) - new Date(a.DateCreate));
+}
+
 
     const indexOfLast = currentPage * offersPerPage;
     const indexOfFirst = indexOfLast - offersPerPage;

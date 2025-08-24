@@ -1,5 +1,5 @@
 // seedInitialData.js
-const { User, Client, Supplier, Materials, Service } = require('./backend/models');
+const { User, Client, Supplier, Materials, Service, Offer, OfferItems } = require('./backend/models');
 const bcrypt = require('bcrypt');
 
 const seed = async () => {
@@ -10,7 +10,7 @@ const seed = async () => {
         // ----- KORISNICI -----
         await User.bulkCreate([
             { Name: 'Korisnik1', Lastname: 'Korisnik1', Email: 'admin@example.com', Password: hashedPassword, Role: 'admin', Contact: '0123456789' },
-            { Name: 'Emina', Lastname: 'Begić', Email: 'begicema@gmail.com', Password: hashedPassword, Role: 'zaposlenik', Contact: '0987654321' },
+            { Name: 'Emina2', Lastname: 'Begić2', Email: 'begicema2@gmail.com', Password: hashedPassword, Role: 'zaposlenik', Contact: '0987654321' },
             { Name: 'Ivan', Lastname: 'Zaposlenik', Email: 'ivan@example.com', Password: hashedPassword, Role: 'zaposlenik', Contact: '0912345678' },
         ]);
 
@@ -42,6 +42,30 @@ const seed = async () => {
             { ID_service: 2, Name: 'Tapiciranje stolice - cijela', Description: 'sjedalo i naslon', PriceNoTax: 50.00, Tax: 25.00, PriceTax: 62.50 },
             { ID_service: 3, Name: 'Popravak naslona', Description: 'manji popravak', PriceNoTax: 15.00, Tax: 25.00, PriceTax: 18.75 }
         ]);
+
+        // ----- OFFERS -----
+await Offer.bulkCreate([
+  { ID_client: 1, DateCreate: "2025-06-25", DateEnd: "2025-07-09", PriceNoTax: 100.00, Tax: 25.00, PriceTax: 125.00, ID_user: 1, HasReceipt: false },
+  { ID_client: 2, DateCreate: "2025-07-05", DateEnd: "2025-07-19", PriceNoTax: 200.00, Tax: 50.00, PriceTax: 250.00, ID_user: 1, HasReceipt: false },
+  { ID_client: 1, DateCreate: "2025-07-14", DateEnd: "2025-07-28", PriceNoTax: 80.00, Tax: 20.00, PriceTax: 100.00, ID_user: 2, HasReceipt: false }
+]);
+
+// ----- OFFER ITEMS -----
+// ⚠️ ako koristiš AUTO_INCREMENT za ID_offer, moraš provjeriti koji ID-evi su stvarno dodijeljeni
+// Ako u bazi već imaš ponude, ove vrijednosti za ID_offer zamijeni sa stvarnim ID-evima
+
+await OfferItems.bulkCreate([
+  // Ponuda 1 -> 1 materijal + 1 usluga
+  { ID_offer: 1, TypeItem: "Materijal", ID_material: 1, ID_service: null, Amount: 2, PriceNoTax: 84.00, Tax: 12.50, PriceTax: 105 },
+  { ID_offer: 1, TypeItem: "Usluga", ID_material: null, ID_service: 1, Amount: 1, PriceNoTax: 29.95, Tax: 7.49, PriceTax: 37.44 },
+
+  // Ponuda 2 -> samo usluga
+  { ID_offer: 2, TypeItem: "Usluga", ID_material: null, ID_service: 2, Amount: 1, PriceNoTax: 50.00, Tax: 12.50, PriceTax: 62.50 },
+
+  // Ponuda 3 -> samo materijal
+  { ID_offer: 3, TypeItem: "Materijal", ID_material: 2, ID_service: null, Amount: 1, PriceNoTax: 80.00, Tax: 20.00, PriceTax: 100.00 }
+]);
+
 
         console.log('Seed podaci uspješno uneseni!');
         process.exit(0);

@@ -38,35 +38,35 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
           <li className="nav-item mb-2">
             <Link to="/getAllUsers" className="nav-link text-white">
-              <i className="fas fa-folder me-2" />
+              <i className="fas fa-user me-2" />
               Korisnici - zaposlenici
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllClients" className="nav-link text-white">
-              <i className="fas fa-folder me-2" />
+              <i className="fas fa-handshake me-2" />
               Klijenti
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllSupplier" className="nav-link text-white">
-              <i className="fas fa-folder me-2" />
+              <i className="fas fa-truck me-2" />
               Dobavljači
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllMaterial" className="nav-link text-white">
-              <i className="fas fa-folder me-2" />
+              <i className="fas fa-box me-2" />
               Materijali
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllService" className="nav-link text-white">
-              <i className="fas fa-folder me-2" />
+              <i className="fas fa-concierge-bell me-2" />
               Usluge
             </Link>
           </li>
@@ -79,7 +79,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               onClick={toggleIzrada}
             >
               <span>
-                <i className="fas fa-folder me-2" />
+                <i className="fas fa-industry me-2" />
                 Izrada
               </span>
               <i className={`fas fa-chevron-${isIzradaOpen ? "up" : "down"}`} />
@@ -111,8 +111,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               onClick={togglePovijest}
             >
               <span>
-                <i className="fas fa-folder me-2" />
-                Povijest
+                <i className="fas fa-file-alt me-2" />
+                Ponude i računi
               </span>
               <i className={`fas fa-chevron-${isPovijestOpen ? "up" : "down"}`} />
             </Button>
@@ -121,14 +121,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <ul className="nav flex-column ms-3">
                 <li className="nav-item mb-1">
                   <Link to="/showOffer" className="nav-link text-white">
-                    <i className="fas fa-history me-2" />
-                    Povijest ponuda
+                    <i className="fas fa-list me-2" />
+                    Aktivne ponude
                   </Link>
                 </li>
                 <li className="nav-item mb-1">
                   <Link to="/showReceipt" className="nav-link text-white">
                     <i className="fas fa-receipt me-2" />
-                    Povijest računa
+                    Računi
                   </Link>
                 </li>
                 <li className="nav-item mb-1">
@@ -143,7 +143,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
           <li className="nav-item mb-2">
             <Link to="/showWarehouseChange" className="nav-link text-white">
-              <i className="fas fa-folder me-2" />
+              <i className="fas fa-tasks me-2" />
               Aktivnosti
             </Link>
           </li>
