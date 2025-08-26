@@ -13,7 +13,7 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-//1. create user 
+//1. KREIRANJE DOBAVLJAČA - CREATE SUPPLIER
 const addSupplier = async (req, res) => {
   try {
     const info = {
@@ -31,7 +31,7 @@ const addSupplier = async (req, res) => {
 
     const supplier = await Supplier.create(info);
 
-    // Logiranje kreiranja dobavljača
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.user.ID_user,
       actionType: 'Dodan novi dobavljač',
@@ -48,39 +48,39 @@ const addSupplier = async (req, res) => {
   }
 };
 
-// 2. Gets all supplier from table
+// 2. PREUZIMANJE SVIH DOBAVLJAČA IZ TABLICE - GET ALL SUPPLIERS FROM TABLE
 const getAllSupplier = async (req, res) => {
-    let supplier = await db.Supplier.findAll({})
-    res.send(supplier)
+  let supplier = await db.Supplier.findAll({})
+  res.send(supplier)
 }
 
-//3. Get one user over id
+//3. PREUZIMANJE JEDNOG DOBAVLJAČA PREKO ID - GETS ONE SUPPLIER OVER ID
 const getOneSupplier = async (req, res) => {
 
-    let ID_supplier = req.params.ID_supplier
-    let supplier = await db.Supplier.findOne({ where: { ID_supplier: ID_supplier}})
-    res.status(200).send(supplier)
+  let ID_supplier = req.params.ID_supplier
+  let supplier = await db.Supplier.findOne({ where: { ID_supplier: ID_supplier } })
+  res.status(200).send(supplier)
 }
 
-//4. update user over id
+//4. AŽURIRANJE DOBAVLJAČA PREKO ID - UPDATE SUPPLIER OVER ID
 const updateSupplier = async (req, res) => {
   try {
     const ID_supplier = req.params.ID_supplier;
 
-    // Dohvati trenutnog dobavljača prije updatea (za logiranje promjene)
+    //4.1.  Dohvati trenutnog dobavljača prije updatea (za logiranje promjene)
     const supplierBefore = await db.Supplier.findByPk(ID_supplier);
 
     if (!supplierBefore) {
       return res.status(404).json({ error: 'Dobavljač nije pronađen' });
     }
 
-    // Update
+    // 4.2. Update
     await db.Supplier.update(req.body, { where: { ID_supplier } });
 
-    // Dohvati ažuriranog dobavljača
+    // 4.3. Dohvati ažuriranog dobavljača
     const updatedSupplier = await db.Supplier.findByPk(ID_supplier);
 
-    // Logiranje promjene
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.user.ID_user,
       actionType: 'Uređivanje dobavljača',
@@ -98,22 +98,22 @@ const updateSupplier = async (req, res) => {
   }
 };
 
-//5. delete user by id
+//5. BRISANJE DOBAVLJAČA PUTEM ID - DELETE SUPPLIER OVER ID
 const deleteSupplier = async (req, res) => {
   try {
     const ID_supplier = req.params.ID_supplier;
 
-    // Dohvati dobavljača prije brisanja za logiranje
+    //5.1. Dohvati dobavljača prije brisanja za logiranje
     const supplier = await db.Supplier.findByPk(ID_supplier);
 
     if (!supplier) {
       return res.status(404).json({ error: 'Dobavljač nije pronađen' });
     }
 
-    // Obriši dobavljača
+    //5.2. Obriši dobavljača
     await db.Supplier.destroy({ where: { ID_supplier } });
 
-    // Logiranje brisanja
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.user.ID_user,
       actionType: 'Brisanje dobavljača',
@@ -132,17 +132,17 @@ const deleteSupplier = async (req, res) => {
 };
 
 
-// 6. Get enum values for Type
+// 6. PREUZIMANJE ENUM VRIJEDNOSTI ZA TIP DOBAVLJAČA (FIZIČKA OSOBA ILI TVRTKA) - GETS ENUM VALUES FOR TYPE SUPPLIER
 const getTypeEnum = (req, res) => {
   const typeEnum = Supplier.rawAttributes.Type.values;
   res.status(200).json(typeEnum);
 };
 
 module.exports = {
-    addSupplier,
-    getAllSupplier,
-    getOneSupplier,
-    updateSupplier,
-    deleteSupplier,
-    getTypeEnum
+  addSupplier,
+  getAllSupplier,
+  getOneSupplier,
+  updateSupplier,
+  deleteSupplier,
+  getTypeEnum
 }

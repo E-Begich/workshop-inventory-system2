@@ -14,7 +14,7 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-//1. create receipt
+//1. KREIRANJE računa - CREATE RECEIPT 
 const addReceipt = async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
@@ -51,13 +51,13 @@ const addReceipt = async (req, res) => {
 
     const receipt = await db.Receipt.create(info);
 
-    // Logiranje kreiranja računa
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.body.ID_user,
       actionType: 'Kreiran račun',
       objectType: 'Racun',
       objectId: receipt.ID_receipt,
-      receiptNumber: receipt.ReceiptNumber,  // ovo će biti EntityName
+      receiptNumber: receipt.ReceiptNumber,
       note: `Račun "${receipt.ReceiptNumber}" je dodan`
     });
 
@@ -69,13 +69,13 @@ const addReceipt = async (req, res) => {
 };
 
 
-// 2. Gets all receipts from table
+// 2. UZIMA SVE RAČUNE IZ BAZE - GETS ALL RECEIPTS FROM BASE
 const getAllReceipt = async (req, res) => {
   let receipt = await Receipt.findAll({})
   res.send(receipt)
 }
 
-//3. Get one receipt over id
+//3. UZIMA JEDAN RAČUN IZ BAZE PO ID - GET ONE RECEIPT OVER ID
 const getOneReceipt = async (req, res) => {
 
   let ID_receipt = req.params.ID_receipt
@@ -83,7 +83,7 @@ const getOneReceipt = async (req, res) => {
   res.status(200).send(receipt)
 }
 
-//4. update RECEIPT // ZA SADA SE NE KORISTI ALI ZA UBUDUĆE DA IMAMO
+//4. UPDATE RECEIPT // ZA SADA SE NE KORISTI ALI ZA UBUDUĆE DA IMAMO
 const updateReceipt = async (req, res) => {
   try {
     let ID_receipt = req.params.ID_receipt;
@@ -96,7 +96,7 @@ const updateReceipt = async (req, res) => {
 
     await Receipt.update(req.body, { where: { ID_receipt } });
 
-    // Logiranje izmjene računa
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.body.ID_user,
       actionType: 'Uređen račun',
@@ -113,12 +113,12 @@ const updateReceipt = async (req, res) => {
   }
 };
 
-//5. delete RECEIPT // ZA SADA SE NE KORISTI BRISANJE, UKOLIKO NEKADA BUDE POTREBNO 
+//5. DELETE RECEIPT // ZA SADA SE NE KORISTI BRISANJE, UKOLIKO NEKADA BUDE POTREBNO 
 const deleteReceipt = async (req, res) => {
   try {
     let ID_receipt = req.params.ID_receipt;
 
-    // dohvatimo račun prije brisanja (da znamo broj za log)
+    // DOHVAT RAČUNA PRIJE BRISANJA - POTREBNO ZA WAREHOUSECHANGE LOG - TAKE RECEIPT BEFORE DELETE FOR WAREHOUSE ACTIVITY LOG
     const receipt = await Receipt.findByPk(ID_receipt);
     if (!receipt) {
       return res.status(404).json({ error: "Račun nije pronađen." });
@@ -126,7 +126,7 @@ const deleteReceipt = async (req, res) => {
 
     await Receipt.destroy({ where: { ID_receipt } });
 
-    // Logiranje brisanja računa
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.body.ID_user,
       actionType: 'Obrisan račun',
@@ -143,13 +143,13 @@ const deleteReceipt = async (req, res) => {
   }
 };
 
-// 6. Create receipt from offer
+// 6. KREIRANJE RAČUNA IZ PONUDE - CREATE RECEIPT FROM OFFER
 const createReceiptFromOffer = async (req, res) => {
   const { ID_offer, ID_user, PaymentMethod } = req.body;
   const currentYear = new Date().getFullYear();
 
   try {
-    // 1. Pronađi ponudu s stavkama
+    // 6.1. PRONAĐI PONUDU SA STAVKAMA - FIND OFFER WITH ITEMS
     const offer = await Offer.findOne({
       where: { ID_offer },
       include: [{ model: OfferItems, as: 'OfferItems' }],
@@ -159,12 +159,12 @@ const createReceiptFromOffer = async (req, res) => {
       return res.status(404).json({ error: 'Ponuda nije pronađena' });
     }
 
-    // provjera HasReceipt
+    // 6.2 PROVJERA HASRECEIPT - CHECK HASRECEIPT (in base)
     if (offer.HasReceipt) {
       return res.status(400).json({ error: 'Ova ponuda već ima kreiran račun' });
     }
 
-    // 2. Izračun cijena (sigurno)
+    // 6.3. IZRAČUN CIJENA - CALCULATE THE PRICE
     const priceNoTax = offer.OfferItems.reduce(
       (sum, item) => sum + (parseFloat(item.PriceNoTax) || 0),
       0
@@ -175,7 +175,7 @@ const createReceiptFromOffer = async (req, res) => {
     );
     const tax = priceTax - priceNoTax;
 
-    // 3. Generiraj broj računa
+    // 6.4. GENERIRAJ BROJ RAČUNA - GANERATE RECEIPT NUMBER
     const latestReceipt = await Receipt.findOne({
       where: db.sequelize.where(
         db.sequelize.fn('YEAR', db.sequelize.col('DateCreate')),
@@ -193,7 +193,7 @@ const createReceiptFromOffer = async (req, res) => {
 
     const receiptNumber = `R-${currentYear}-${String(nextNumber).padStart(5, '0')}`;
 
-    // 4. Pripremi stavke računa (sigurno)
+    // 6.5. PRIPREMI STAVKE RAČUNA
     const receiptItems = offer.OfferItems.map(item => ({
       TypeItem: item.TypeItem,
       ID_material: item.ID_material || null,
@@ -204,7 +204,7 @@ const createReceiptFromOffer = async (req, res) => {
       PriceTax: item.PriceTax || 0,
     }));
 
-    // 5. Kreiraj račun
+    // 6.6. KREIRAJ RAČUN - PREPARE RECEIPT
     const receipt = await Receipt.create({
       ReceiptNumber: receiptNumber,
       ID_client: offer.ID_client,
@@ -217,6 +217,7 @@ const createReceiptFromOffer = async (req, res) => {
       PaymentMethod
     });
 
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: ID_user,
       actionType: 'Kreiran račun iz ponude',
@@ -226,10 +227,10 @@ const createReceiptFromOffer = async (req, res) => {
       note: `Račun "${receipt.ReceiptNumber}" je kreiran iz ponude #${ID_offer}`
     });
 
-    // 6. Oznaci ponudu kao iskorištenu
+    // 6.7. OZNAČI PONUDU KAO ISKORIŠTENU - MARK THE OFFER AS USED
     await Offer.update({ HasReceipt: true }, { where: { ID_offer } });
 
-    // 7. Dodaj stavke i ažuriraj skladište
+    // 6.8. DODAJ STAVKE I AŽURIRAJ SKLADIŠTE - ADD ITEMS AND UPDATE WAREHOUSE
     for (const item of receiptItems) {
       await ReceiptItems.create({
         ID_receipt: receipt.ID_receipt,
@@ -261,12 +262,13 @@ const createReceiptFromOffer = async (req, res) => {
 };
 
 
-// 6. Get enum values for Type
+// 7. UZMI ENUM VRIJEDNOSTI ZA TYPE - GET ENUM VALUES FOR TYPE
 const getPaymentEnum = (req, res) => {
   const paymentEnum = Receipt.rawAttributes.PaymentMethod.values;
   res.status(200).json(paymentEnum);
 };
 
+// 8. ZA MODAL PREGLED RAČUNA U APLIKACIJI - FOR RECEIPT PREVIEW MODAL IN THE APPLICATION
 const getReceiptWithDetails = async (req, res) => {
   const ID_receipt = req.params.ID_receipt;
 
@@ -288,7 +290,7 @@ const getReceiptWithDetails = async (req, res) => {
   }
 };
 
-// generateReceiptPDF.js
+// 9. GENERIRANJE I IZGLED PDF-a - GENERATE AND PREVIEW PDF
 const PDFDocument = require('pdfkit');
 const path = require('path');
 const QRCode = require('qrcode');
@@ -482,13 +484,14 @@ const generateReceiptPDF = async (req, res) => {
   }
 };
 
+// 10. ZA HOMEPAGE PRIKAZ MJESEČNE PRODAJE - FOR HOMEPAGE, MONHTLY SALES
 const getMonthlySales = async (req, res) => {
   try {
     const results = await Receipt.findAll({
       attributes: [
         [sequelize.fn("YEAR", sequelize.col("DateCreate")), "year"],
         [sequelize.fn("MONTH", sequelize.col("DateCreate")), "month"],
-        [sequelize.fn("SUM", sequelize.col("PriceNoTax")), "total"] // mislim da treba PriceNoTax, ne Total
+        [sequelize.fn("SUM", sequelize.col("PriceNoTax")), "total"] 
       ],
       group: [
         sequelize.fn("YEAR", sequelize.col("DateCreate")),
@@ -507,6 +510,7 @@ const getMonthlySales = async (req, res) => {
   }
 };
 
+// 11. HOMEPAGE, PRIKAZ TOP 5 MATERIJALA SA NAJVIŠOM KOLIČINOM - HOMEPAGE, CHECK 5 MATERIALS WITH HIGHEST AMOUNT
 const getTopMaterials = async (req, res) => {
   try {
     const topMaterials = await Materials.findAll({

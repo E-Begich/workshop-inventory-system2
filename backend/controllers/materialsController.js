@@ -13,7 +13,7 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-//1. create user 
+//1. KREIRANJE MATERIJALA - CREATE MATERIAL 
 const addMaterial = async (req, res) => {
   try {
     // Pripremamo podatke za kreiranje materijala
@@ -28,24 +28,22 @@ const addMaterial = async (req, res) => {
       PurchasePrice: req.body.PurchasePrice,
       SellingPrice: req.body.SellingPrice,
       ID_supplier: req.body.ID_supplier,
-      TypeChange: req.body.TypeChange, // OBAVEZNO
+      TypeChange: req.body.TypeChange,
     };
 
-    // Kreiramo materijal u bazi
     const material = await Materials.create(info);
 
-    // Logiranje kreiranja materijala
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'Dodan novi materijal',            // tip akcije
+      actionType: 'Dodan novi materijal',
       objectType: 'Materijal',
       objectId: material.ID_material,
-      materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName
+      materialName: material.NameMaterial,
       amount: material.Amount,
       note: `Materijal "${material.NameMaterial}" je dodan`
     });
 
-    // Odgovor klijentu
     res.status(200).json(material);
 
   } catch (error) {
@@ -54,15 +52,13 @@ const addMaterial = async (req, res) => {
   }
 };
 
-
-
-// 2. Gets all users from table
+// 2. UZIMA SVE MATERIJALE IZ BAZE - GETS ALL MATERIALS FROM BASE
 const getAllMaterial = async (req, res) => {
   let material = await Materials.findAll({})
   res.send(material)
 }
 
-//3. Get one user over id
+//3. UZIMA JEDAN MATERIJAL IZ BAZE PO ID - GET ONE MATERIAL OVER ID
 const getOneMaterial = async (req, res) => {
 
   let ID_material = req.params.ID_material
@@ -70,7 +66,7 @@ const getOneMaterial = async (req, res) => {
   res.status(200).send(material)
 }
 
-//4. update user over id
+//4. AŽURIRA PODATKE MATERIJALA PO ID - UPDATE MATERIAL OVER ID
 const updateMaterial = async (req, res) => {
   const ID_material = req.params.ID_material;
 
@@ -85,13 +81,13 @@ const updateMaterial = async (req, res) => {
     // Ažuriraj podatke
     await material.update(req.body);
 
-    // Logiranje promjene
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'Uređen materijal',            // tip akcije
+      actionType: 'Uređen materijal',
       objectType: 'Materijal',
       objectId: material.ID_material,
-      materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName
+      materialName: material.NameMaterial,
       amount: material.Amount,
       note: `Materijal "${material.NameMaterial}" je uređen.`
     });
@@ -109,29 +105,28 @@ const updateMaterial = async (req, res) => {
 //  await Materials.destroy({ where: { ID_material: ID_material } })
 //  res.send('Materijal je obrisan!')
 //}
-
+//5. BRISANJE MATERIJALA PREMA ID - DELETE MATERIAL OVER ID
 const deleteMaterial = async (req, res) => {
   const ID_material = req.params.ID_material;
 
   try {
-    // Prvo provjerimo postoji li materijal
+    // Prvo provjerimo postoji li materijal - CHECK IF MATERIAL EXIST
     const material = await Materials.findByPk(ID_material);
     if (!material) {
       return res.status(404).json({ message: 'Materijal nije pronađen.' });
     }
 
-    // Logiranje brisanja
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
       userId: req.user.ID_user,
-      actionType: 'Obrisan materijal',            // tip akcije
+      actionType: 'Obrisan materijal',           
       objectType: 'Materijal',
       objectId: material.ID_material,
-      materialName: material.NameMaterial,  // OBAVEZNO za ispis EntityName
+      materialName: material.NameMaterial, 
       amount: -material.Amount,
       note: `Materijal "${material.NameMaterial}" je obrisan`
     });
-
-    // Brisanje materijala
+    // BRISANJE MATERIJALA - DELETE MATERIAL
     await material.destroy();
 
     res.status(200).json({ message: 'Materijal je obrisan!' });
@@ -141,26 +136,25 @@ const deleteMaterial = async (req, res) => {
   }
 };
 
-// 6. Get enum values for Location
+// 6.  DOHVAT ENUM PODATAKA ZA LOKACIJU (SKLADIŠTE) - GET ENUM VALUES FOR LOCATION (STORAGE)
 const getLocationEnum = (req, res) => {
   const locationEnums = Materials.rawAttributes.Location.values;
   res.status(200).json(locationEnums);
 };
 
-// 7. Get enum values for Unit
+// 7.  DOHVAT ENUM PODATAKA ZA JEDINICU - GET ENUM VALUES FOR UNIT
 const getUnitEnum = (req, res) => {
   const unitEnums = Materials.rawAttributes.Unit.values;
   res.status(200).json(unitEnums);
 };
 
-// 8. Get enum values for TypeChange
+// 8.  DOHVAT ENUM PODATAKA ZA VRSTU PROMJENE (TypeChange) - GET ENUM VALUES FOR TypeChange
 const getTypeChangeEnum = (req, res) => {
   const typeEnums = Materials.rawAttributes.TypeChange.values;
   res.status(200).json(typeEnums);
 };
 
-// 9. Ažuriraj količinu materijala (smanji na osnovu računa)
-// PUT /api/aplication/updateMaterialAmount/:ID_material
+// 9.  AŽURIRAJ KOLIČINU MATERIJALA U SKLADIŠTU (PRI IZRADI RAČUNA) - UPDATE THE AMOUNT OF MATERIALS IN THE WAREHOUSE (WHEN CREATING RECEIPTS)
 const updateMaterialAmount = async (req, res) => {
   const ID_material = req.params.ID_material;
   const { Amount: usedAmount } = req.body;
@@ -168,7 +162,7 @@ const updateMaterialAmount = async (req, res) => {
   try {
     const material = await Materials.findOne({ where: { ID_material } });
 
-    if (!material) {
+    if (!material) { //ako materijal ne postoji
       return res.status(404).json({ message: 'Materijal nije pronađen.' });
     }
 
@@ -197,7 +191,7 @@ const updateMaterialAmount = async (req, res) => {
 
 
 
-// 10. Provjeri ima li dovoljno materijala
+// 10. PROVJERI IMA LI DOVOLJNO MATERIJALA - CHECK IF THERE IS ENOUGH MATERIAL
 const checkMaterialStock = async (req, res) => {
   const { ID_material, requestedAmount } = req.body;
 

@@ -14,35 +14,34 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-//1. create user 
-
+//1. KREIRANJE KORISNIKA - CREATE USER
 const addUser = async (req, res) => {
     try {
         const { Name, Lastname, Email, Contact, Password, Role } = req.body;
 
-        // 🔹 1. Osnovna validacija
+        // 1.1. OSNOVNA VALIDACIJA (ZA POPUNJAVANJE POLJA) - PRIMARY VALIDATE
         if (!Name || !Lastname || !Email || !Password) {
             return res.status(400).json({ message: 'Ime, prezime, email i lozinka su obavezni!' });
         }
 
-        // 🔹 2. Email format
+        // 1.2. FORMAT EMAIL ADRESE - EMAIL FORMAT
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(Email)) {
             return res.status(400).json({ message: 'Neispravan format email adrese' });
         }
 
-        // 🔹 3. Provjera da li već postoji korisnik s tim emailom
+        // 1.3. PROVJERA DA LI EMAIL VEĆ POSTOJI - CHECK IF EMAIL EXIST IN BASE
         const existingUser = await User.findOne({ where: { Email } });
         if (existingUser) {
             return res.status(400).json({ message: 'Korisnik s ovom email adresom već postoji' });
         }
 
-        // 🔹 4. Lošinka minimalno 6 znakova
+        // 1.4. VALIDACIJA LOZINKE - VALIDATION PASSWORD
         if (Password.length < 6) {
             return res.status(400).json({ message: 'Lozinka mora imati barem 6 znakova' });
         }
 
-        // 🔹 5. Hash lozinke
+        // 1.5. HASH LOZINKE
         const hashedPassword = await bcrypt.hash(Password, 10);
 
         let info = {
@@ -62,13 +61,13 @@ const addUser = async (req, res) => {
     }
 };
 
-// 2. Gets all users from table
+// 2. PREUZIMA SVE KORISNIKE IZ TABLICE - GETS ALL USERS FROM TABLE
 const getAllUsers = async (req, res) => {
     let user = await User.findAll({})
     res.send(user)
 }
 
-//3. Get one user over id
+//3. PREUZIMA JEDNOG KORISNIKA PO ID - GERTS ONE USER OVER ID
 const getOneUser = async (req, res) => {
 
     let ID_user = req.params.ID_user
@@ -76,19 +75,19 @@ const getOneUser = async (req, res) => {
     res.status(200).send(user)
 }
 
-//4. update user over id
+//4. AŽURIRA JEDNOG KORISNIKA PO ID - UPDATE ONE USER OVER ID
 const updateUser = async (req, res) => {
     try {
         const ID_user = req.params.ID_user;
         const { Name, Lastname, Email, Contact, Password, Role } = req.body;
 
-        // 1. Nađi korisnika
+        // 4.1. NAĐI KORISNIKA - FIND USER
         const user = await User.findOne({ where: { ID_user } });
         if (!user) {
             return res.status(404).json({ message: 'Korisnik ne postoji' });
         }
 
-        // 2. Provjera emaila ako se mijenja
+        // 4.2. PROVJERA EMILA UKOLIKO SE MIJENJA - CHECK EMAIL IN CHANGE CASE
         if (Email && Email !== user.Email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(Email)) {
@@ -100,8 +99,8 @@ const updateUser = async (req, res) => {
             }
         }
 
-        // 3. Hashiranje lozinke ako je poslano novo polje
-        let hashedPassword = user.Password; 
+        // 4.3. HASH LOZINKE
+        let hashedPassword = user.Password;
         if (Password && Password.trim() !== '') {
             if (Password.length < 6) {
                 return res.status(400).json({ message: 'Lozinka mora imati barem 6 znakova' });
@@ -109,7 +108,7 @@ const updateUser = async (req, res) => {
             hashedPassword = await bcrypt.hash(Password, 10);
         }
 
-        // 4. Ručno postavljanje polja na instanci i spremanje
+        // 4.4. Ručno postavljanje polja na instanci i spremanje
         user.Name = Name ?? user.Name;
         user.Lastname = Lastname ?? user.Lastname;
         user.Email = Email ?? user.Email;
@@ -128,12 +127,12 @@ const updateUser = async (req, res) => {
 };
 
 
-//5. delete user by id
+//5. BRISANJE KORISNIKA PO ID - DELETE USER OVER ID
 const deleteUser = async (req, res) => {
     try {
         const { ID_user } = req.params;
 
-        // Provjera povezanih zapisa
+        // 5.1. PROVJERA UKOLIKO KORISNIK IMA ZAPISA (PONUDE ILI RAČUNI) - CHECK IF USER HAS A OFFERS AND/OR RECEIPTS
         const offers = await Offer.count({ where: { ID_user } });
         const receipts = await Receipt.count({ where: { ID_user } });
         const changes = await WarehouseChange.count({ where: { ID_user } });
@@ -152,12 +151,13 @@ const deleteUser = async (req, res) => {
     }
 };
 
-// 6. Get enum values for Role
+// 6. PREUZIMANJE ENUM VRIJEDNOSTI ZA ULOGU - GETS ENUM VALUES FOR ROLE
 const getRoleEnum = (req, res) => {
     const roleEnum = User.rawAttributes.Role.values;
     res.status(200).json(roleEnum);
 };
 
+// 7. ZA PRIJAVU - FOR LOGIN
 const loginUser = async (req, res) => {
     try {
         const { Email, Password } = req.body;
@@ -187,7 +187,6 @@ const loginUser = async (req, res) => {
         res.status(500).json({ message: 'Greška na serveru' });
     }
 };
-
 
 module.exports = {
     addUser,

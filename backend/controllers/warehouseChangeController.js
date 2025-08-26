@@ -14,7 +14,7 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-//1. create user 
+//1. KREIRANJE PROMJENA - CREATE A CHANGES - OVO JE OSNOVNA, ISPOD IMAMO PRILAGOĐENU NOVOM SUSTAVU
 const addChange = async (req, res) => {
 
   let info = {
@@ -32,13 +32,13 @@ const addChange = async (req, res) => {
   console.log(change)
 }
 
-// 2. Gets all users from table
+// 2. PREUZIMANJE SVIH PROMJENA IZ TABLICE - GETS ALL CHANGES FROM TABLE - OVO JE OSNOVNA, ISPOD IMAMO PRILAGOĐENU NOVOM SUSTAVU
 const getAllChange = async (req, res) => {
   let change = await WarehouseChange.findAll({})
   res.send(change)
 }
 
-//3. Get one user over id
+//3. PREUZIMANJE JEDNOG ZAPISA - OVVO TRENUTNO NE TREBA JER NE TRAŽIMO DETALJAN OPIS
 const getOneChange = async (req, res) => {
 
   let ID_change = req.params.ID_change
@@ -46,14 +46,14 @@ const getOneChange = async (req, res) => {
   res.status(200).send(change)
 }
 
-//4. update user over id
+//4. AŽURIRANJE - TRENUTNO NE TREBA ALI U SLUČAJU DA ZATREBA
 const updateChange = async (req, res) => {
   let ID_change = req.params.ID_change
   const change = await WarehouseChange.update(req.body, { where: { ID_change: ID_change } })
   res.status(200).send(change)
 }
 
-//5. delete user by id
+//5. BRISANJE ZAPISA - DELETE CHANGE - TRENUTNO NE TREBA ALI U SLUČAJU NEKOG AŽURIRANJE APLIKACIJE 
 const deleteChange = async (req, res) => {
 
   let ID_change = req.params.ID_change
@@ -73,7 +73,8 @@ const deleteChange = async (req, res) => {
  * @param {number} [params.amount] - količina ako je vezano za materijal
  * @param {string} [params.note] - bilješke
  */
-// controllers/warehouseChangeController.js
+
+//6. NOVA FUNKCIJA SPREMANJA PROMJENA - NEW FUNCTION FOR CREATE CHANGES
 const logChange = async ({
   userId,
   actionType,
@@ -114,7 +115,7 @@ const logChange = async ({
   }
 };
 
-
+// 7. NEW ZA PREUZIMANJE SVIH PROMJENA - FOR GET ALL CHANGES
 const getAllChanges = async (req, res) => {
   try {
     const changes = await WarehouseChange.findAll({
@@ -151,6 +152,7 @@ const getAllChanges = async (req, res) => {
   }
 };
 
+// 8. PREUZIMANJE SVIH LOGOVA 
 const getActivityLogs = async (req, res) => {
   try {
     const logs = await WarehouseChange.findAll({
@@ -171,7 +173,7 @@ const getActivityLogs = async (req, res) => {
   }
 };
 
-// Dohvati nepročitane logove
+// 9. Dohvati nepročitane logove //ZA NOTIFIKACIJE U TOPNAVBARU
 const getUnreadActivityLogs = async (req, res) => {
   try {
     const logs = await WarehouseChange.findAll({
@@ -187,7 +189,7 @@ const getUnreadActivityLogs = async (req, res) => {
   }
 };
 
-// Označi sve nepročitane logove kao pročitane
+// 10. GUMB ZA OZNAČABANJE SVIH NOTOFIKACIJA ZA PROČITANE ZAPISE - BUTTON FOR CHECK ALL READ NOTIFICATION
 const markLogsAsRead = async (req, res) => {
   try {
     const [updated] = await WarehouseChange.update(
@@ -201,8 +203,6 @@ const markLogsAsRead = async (req, res) => {
     res.status(500).json({ error: "Greška kod označavanja pročitanih logova." });
   }
 };
-
-
 
 module.exports = {
   addChange,

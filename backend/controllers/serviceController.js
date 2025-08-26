@@ -12,7 +12,7 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-//1. create user 
+//1. KREIRANJE USLUGE - CREATE SERVICE
 const addService = async (req, res) => {
     try {
         let info = {
@@ -33,13 +33,13 @@ const addService = async (req, res) => {
     }
 };
 
-// 2. Gets all users from table
+// 2. PREUZIMA SVE USLUGE IZ TABLICE - GETS ALL SERVICE FROM TABLE
 const getAllService = async (req, res) => {
     let service = await Service.findAll({})
     res.send(service)
 }
 
-//3. Get one user over id
+//3. UZIMA JEDNU USLUGU PREMA ID - GETS ONE SERVICE OVER ID
 const getOneService= async (req, res) => {
 
     let ID_service = req.params.ID_service
@@ -47,14 +47,14 @@ const getOneService= async (req, res) => {
     res.status(200).send(service)
 }
 
-//4. update user over id
+//4. AŽURIRANJE USLUGE PREKO ID - UPDATE SERVICE OVER ID
 const updateService = async (req, res) => {
     let ID_service = req.params.ID_service
     const service = await Service.update(req.body, {where: { ID_service: ID_service }})
     res.status(200).send(service)
 }
 
-//5. delete user by id
+//5. BRISANJE USLUGE PREKO ID - DELETE SERVICE OVER ID
 const deleteService = async (req, res) => {
 
     let ID_service = req.params.ID_service

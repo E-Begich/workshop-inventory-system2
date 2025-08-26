@@ -14,7 +14,7 @@ const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
 
-//1. create user 
+//1. KREIRANJE KLIJENTA - CREATE CLIENT 
 const addClient = async (req, res) => {
     try {
         let info = {
@@ -32,7 +32,7 @@ const addClient = async (req, res) => {
         }
 
         const client = await Client.create(info)
-        // Logiranje kreiranja klijenta
+        // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
         await logChange({
             userId: req.user.ID_user,
             actionType: 'Dodan klijent',
@@ -52,13 +52,13 @@ const addClient = async (req, res) => {
     }
 };
 
-// 2. Gets all users from table
+// 2. UZIMA SVE KLIJENTE IZ BAZE - GETS ALL CLIENTS FROM BASE
 const getAllClients = async (req, res) => {
     let client = await Client.findAll({})
     res.send(client)
 }
 
-//3. Get one user over id
+//3. UZIMA JEDNOG KLIJENTA IZ BAZE PO ID - GET ONE CLIENT OVER ID
 const getOneClient = async (req, res) => {
 
     let ID_client = req.params.ID_client
@@ -66,8 +66,7 @@ const getOneClient = async (req, res) => {
     res.status(200).send(client)
 }
 
-//4. update user over id
-// UPDATE
+//4. AŽURIRA PODATKE KLIJENTA PO ID - UPDATE CLIENT OVER ID
 const updateClient = async (req, res) => {
     const ID_client = req.params.ID_client;
 
@@ -79,7 +78,7 @@ const updateClient = async (req, res) => {
 
         await client.update(req.body);
 
-        // logiraj promjenu
+        // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
         await logChange({
             userId: req.user.ID_user,
             actionType: 'Uređivanje klijenta',
@@ -98,8 +97,7 @@ const updateClient = async (req, res) => {
     }
 };
 
-//5. delete user by id
-// DELETE
+//5. BRISANJE KLIJENTA PREMA ID - DELETE CLIENT OVER ID
 const deleteClient = async (req, res) => {
     const ID_client = req.params.ID_client;
 
@@ -109,7 +107,7 @@ const deleteClient = async (req, res) => {
             return res.status(404).json({ message: 'Klijent nije pronađen.' });
         }
 
-        // logiraj brisanje prije nego što ga obrišeš
+        // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
         await logChange({
             userId: req.user.ID_user,
             actionType: 'Brisanje klijenta',
@@ -130,7 +128,7 @@ const deleteClient = async (req, res) => {
     }
 };
 
-// 6. Get enum values for Role
+// 6.  DOHVAT ENUM PODATAKA ZA ULOGU - GET ENUM VALUES FOR ROLE
 const getTypeClientEnum = (req, res) => {
     const clientEnum = Client.rawAttributes.TypeClient.values;
     res.status(200).json(clientEnum);

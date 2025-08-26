@@ -12,7 +12,7 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-//1. create user 
+//1. KREIRANJE STAVKI ZA RAČUN - CREATE RECEIPTITEMS
 const addReceiptItems = async (req, res) => {
   try {
     console.log("Primljene stavke:", req.body);
@@ -32,46 +32,46 @@ const addReceiptItems = async (req, res) => {
   }
 };
 
-// 2. Gets all offerItems from table
+// 2. PREUZMI SVE OFFERITEMS IZ TABLICE - GET ALL OFFERITEMS FROM TABLE
 const getAllReceiptItems = async (req, res) => {
-    let receiptItems = await db.ReceiptItems.findAll({})
-    res.send(receiptItems)
+  let receiptItems = await db.ReceiptItems.findAll({})
+  res.send(receiptItems)
 }
 
-//3. Get one user over id
-const getOneReceiptItem= async (req, res) => {
+//3. UZIMANJE JEDNOG OFFERITEMS IZ TABLICE - GET ONE OFFERITEMS FROM TABLE
+const getOneReceiptItem = async (req, res) => {
 
-    let ID_recItems = req.params.ID_recItems
-    let receiptItems = await db.ReceiptItems.findOne({ where: { ID_recItems: ID_recItems}})
-    res.status(200).send(receiptItems)
+  let ID_recItems = req.params.ID_recItems
+  let receiptItems = await db.ReceiptItems.findOne({ where: { ID_recItems: ID_recItems } })
+  res.status(200).send(receiptItems)
 }
 
-//4. update user over id
+//4. AŽURIRANJE JEDNOG OFFERITEMS IZ TABLICE - UPDATE ONE OFFERITEMS FROM TABLE (OVO TREBA U SLUČAJU AŽURIRANJA PRILIKOM IZRADE RAČUNA)
 const updateReceiptItem = async (req, res) => {
-    let ID_recItems = req.params.ID_recItems
-    const receiptItems = await db.ReceiptItems.update(req.body, {where: { ID_recItems: ID_recItems }})
-    res.status(200).send(receiptItems)
+  let ID_recItems = req.params.ID_recItems
+  const receiptItems = await db.ReceiptItems.update(req.body, { where: { ID_recItems: ID_recItems } })
+  res.status(200).send(receiptItems)
 }
 
-//5. delete user by id
+//5. BRISANJE STAVKE U RAČUNU - PRILIKOM IZRADE RAČUNA - DELETE ITEM FROM RECEIPT - JUST WHEN NEED TO DELETE BEFORE CREATE RECEIPT
 const deleteReceiptItem = async (req, res) => {
 
-    let ID_recItems = req.params.ID_recItems
-    await ReceiptItems.destroy({where: { ID_recItems: ID_recItems }})
-    res.send('Stavka je obrisana!')
+  let ID_recItems = req.params.ID_recItems
+  await ReceiptItems.destroy({ where: { ID_recItems: ID_recItems } })
+  res.send('Stavka je obrisana!')
 }
 
-   // 8. Get enum values for TypeItem
-    const getRecTypeItemEnum = (req, res) => {
-      const typeEnums = OfferItems.rawAttributes.TypeItem.values;
-      res.status(200).json(typeEnums);
-    };
+// 8. UZIMANJE ENUM VRIJEDNOSTI ZA TIP STAVKE (MATERIJAL, USLUGA) - GETS ENUM VALUE FOR TYPEITEM
+const getRecTypeItemEnum = (req, res) => {
+  const typeEnums = OfferItems.rawAttributes.TypeItem.values;
+  res.status(200).json(typeEnums);
+};
 
 module.exports = {
-    addReceiptItems,
-    getAllReceiptItems,
-    getOneReceiptItem,
-    updateReceiptItem,
-    deleteReceiptItem,
-    getRecTypeItemEnum
+  addReceiptItems,
+  getAllReceiptItems,
+  getOneReceiptItem,
+  updateReceiptItem,
+  deleteReceiptItem,
+  getRecTypeItemEnum
 }

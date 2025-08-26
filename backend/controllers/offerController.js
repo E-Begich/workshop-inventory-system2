@@ -3,8 +3,6 @@ const db = require('../models')
 const { logChange } = require('./warehouseChangeController');
 const { Op } = require("sequelize");
 
-
-
 //creating main models
 const User = db.User
 const Client = db.Client
@@ -17,7 +15,7 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-//1. create offer
+//1. KREIRANJE PONUDE - CREATE OFFER - ISPOD KORISTIMO PRAVU FUNKCIJU GDJE SE POSEBNI SPREMAJU I STAVKE
 const addOffer = async (req, res) => {
     try {
         const {
@@ -42,7 +40,7 @@ const addOffer = async (req, res) => {
             HasReceipt: false
         });
 
-        // Logiranje kreiranja ponude
+        // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
         await logChange({
             userId: ID_user,
             actionType: 'Kreirana ponuda',
@@ -60,13 +58,13 @@ const addOffer = async (req, res) => {
     }
 };
 
-// 2. Gets all offer from table
+// 2. UZIMA SVE PONUDE IZ BAZE - GETS ALL OFFERS FROM BASE
 const getAllOffer = async (req, res) => {
     let offer = await Offer.findAll({})
     res.send(offer)
 }
 
-//3. Get one user over id
+//3. UZIMA JEDNU PONUDU IZ BAZE PO ID - GET ONE OFFER OVER ID
 const getOneOffer = async (req, res) => {
 
     let ID_offer = req.params.ID_offer
@@ -74,55 +72,55 @@ const getOneOffer = async (req, res) => {
     res.status(200).send(offer)
 }
 
-//4. update offer over id
+//4. AŽURIRA PODATKE PONUDE PO ID - UPDATE OFFER OVER ID
 //ovo za sada ne treba
 const updateOffer = async (req, res) => {
     let ID_offer = req.params.ID_offer
     const offer = await Offer.update(req.body, { where: { ID_offer: ID_offer } })
 
-    // Logiranje izmjene ponude
+    // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
     await logChange({
         userId: ID_user,
         actionType: 'Uređena ponuda',
         objectType: 'Ponuda',
         objectId: newOffer.ID_offer,
-        offerNumber: newOffer.ID_offer,   // <-- ako imaš polje OfferNumber
+        offerNumber: newOffer.ID_offer,
         note: `Ponuda "${newOffer.ID_offer}" je kreirana`
     });
 
     res.status(200).send(offer)
 }
 
-//5. delete offer by id
+//5. BRISANJE PONUDE PREMA ID - DELETE OFFER OVER ID
 const deleteOffer = async (req, res) => {
-  try {
-    const ID_user = req.user?.ID_user; // dohvaća iz tokena/sessiona
-    const ID_offer = req.params.ID_offer;
+    try {
+        const ID_user = req.user?.ID_user;
+        const ID_offer = req.params.ID_offer;
 
-    const offer = await Offer.findByPk(ID_offer);
-    if (!offer) {
-      return res.status(404).json({ message: "Ponuda nije pronađena" });
+        const offer = await Offer.findByPk(ID_offer);
+        if (!offer) {
+            return res.status(404).json({ message: "Ponuda nije pronađena" });
+        }
+
+        await Offer.destroy({ where: { ID_offer } });
+        // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
+        await logChange({
+            userId: ID_user,
+            actionType: "Obrisana ponuda",
+            objectType: "Ponuda",
+            objectId: offer.ID_offer,
+            offerNumber: offer.ID_offer,
+            note: `Ponuda "${offer.ID_offer}" je obrisana`,
+        });
+
+        res.send("Ponuda je obrisana!");
+    } catch (error) {
+        console.error("Greška kod brisanja ponude:", error);
+        res.status(500).json({ message: "Greška na serveru" });
     }
-
-    await Offer.destroy({ where: { ID_offer } });
-
-    await logChange({
-      userId: ID_user,
-      actionType: "Obrisana ponuda",
-      objectType: "Ponuda",
-      objectId: offer.ID_offer,
-      offerNumber: offer.ID_offer,
-      note: `Ponuda "${offer.ID_offer}" je obrisana`,
-    });
-
-    res.send("Ponuda je obrisana!");
-  } catch (error) {
-    console.error("Greška kod brisanja ponude:", error);
-    res.status(500).json({ message: "Greška na serveru" });
-  }
 };
 
-
+// 6. PREUZIMANJE PONUDE SA SVIM STAVKAMA (OfferItems) - GET OFFER WITH ALL ITEMS (OfferItems)
 const getOfferWithDetails = async (req, res) => {
     let ID_offer = req.params.ID_offer;
 
@@ -144,6 +142,7 @@ const getOfferWithDetails = async (req, res) => {
     }
 };
 
+// 7. KREIRANJE PONUDE I DODAVANJE STAVKI U OfferItems - CREATING AN OFFER AND ADDING ITEMS TO OfferItems
 const createOfferWithItems = async (req, res) => {
     const {
         ID_client,
@@ -159,7 +158,7 @@ const createOfferWithItems = async (req, res) => {
     const t = await sequelize.transaction(); // pokrećemo transakciju
 
     try {
-        // 1. Kreiraj ponudu
+        // 1. KREIRANJE PONUDE - CREATE OFFER
         const offer = await Offer.create({
             ID_client,
             DateCreate,
@@ -171,7 +170,7 @@ const createOfferWithItems = async (req, res) => {
             HasReceipt: false
         }, { transaction: t });
 
-        // 2. Dodaj stavke, povezujući ih s kreiranom ponudom
+        // 2. Dodaj stavke, povezujući ih s kreiranom ponudom - ADD ITEMS, LINKING THEM TO THE CREATED OFFER
         for (let item of items) {
             await OfferItems.create({
                 ID_offer: offer.ID_offer,
@@ -188,7 +187,7 @@ const createOfferWithItems = async (req, res) => {
         // 3. Commit transakcije
         await t.commit();
 
-        // Logiranje kreiranja ponude s artiklima
+        // PODACI ZA SPREMANJE U WAREHOUSECHANGE - INFORMATION FOR WAREHOUSECHANGE
         //trenutno ne treba
         await logChange({
             userId: ID_user,
@@ -205,7 +204,7 @@ const createOfferWithItems = async (req, res) => {
         res.status(500).json({ message: 'Greška pri kreiranju ponude', error: error.message });
     }
 };
-
+// 8. GENERIRANJE QR - GENERATE QR (SAMO TESTNA FAZA - NE RADI ZAPRAVO)
 function generateHUB3QR({ amount, recipientName, recipientAddress, recipientCity, iban, description, reference }) {
     function formatAmount(amount) {
         return parseFloat(amount).toFixed(2).padStart(15, '0'); // npr. 00000000123.45
@@ -230,13 +229,13 @@ function generateHUB3QR({ amount, recipientName, recipientAddress, recipientCity
     return hub3Data.join('\n');
 }
 
-//forma za kreiranje i izgled PDF dokumenta
+// 9. FORMA ZA KREIRANJE I GENERIRANJE PDF DOKUMENTA - FORM FOR CREATING AND GENERATING PDF DOCUMENT
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 const formatCurrency = (value) => `${parseFloat(value || 0).toFixed(2)} €`;
 
-// Kreiraj dokument
+// Kreiraj dokument - create document
 const doc = new PDFDocument();
 
 const generateOfferPDF = async (req, res) => {
@@ -256,7 +255,7 @@ const generateOfferPDF = async (req, res) => {
 
 
 
-        // Kreiraj novi PDF dokument
+        // Kreiraj novi PDF dokument - create NEW PDF document
         const doc = new PDFDocument({ margin: 50 });
 
         const fontPath = path.join(__dirname, '..', 'fonts', 'DejaVuSans.ttf');
@@ -332,7 +331,6 @@ const generateOfferPDF = async (req, res) => {
                 width: colWidths[i],
                 align: 'left',
                 ellipsis: true,
-                // Ako želiš da dugi tekst u zaglavlju bude u dva reda:
                 lineGap: 2,
             });
         });
@@ -462,37 +460,35 @@ const generateOfferPDF = async (req, res) => {
     }
 };
 
-// Aktivne ponude
+// 10. PREUZIMANJE AKTIVNIH PONUDA - GETS ACTIVE OFFERS
 const getActiveOffers = async (req, res) => {
-  try {
-    const offers = await Offer.findAll({
-      where: {
-        DateEnd: { [Op.gte]: new Date() }
-      }
-    });
-    res.json(offers);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Greška pri dohvaćanju aktivnih ponuda" });
-  }
+    try {
+        const offers = await Offer.findAll({
+            where: {
+                DateEnd: { [Op.gte]: new Date() }
+            }
+        });
+        res.json(offers);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Greška pri dohvaćanju aktivnih ponuda" });
+    }
 };
 
-// Arhivirane ponude
+// 11. PREUZIMANJE ARHIVIRANIH (ONE KOJE SU ISTEKLE) PONUDA - GETS ARCHIVED OFFERS
 const getArhivedOffers = async (req, res) => {
-  try {
-    const offers = await Offer.findAll({
-      where: {
-        DateEnd: { [Op.lt]: new Date() }
-      }
-    });
-    res.json(offers);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Greška pri dohvaćanju arhiviranih ponuda" });
-  }
+    try {
+        const offers = await Offer.findAll({
+            where: {
+                DateEnd: { [Op.lt]: new Date() }
+            }
+        });
+        res.json(offers);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Greška pri dohvaćanju arhiviranih ponuda" });
+    }
 };
-
-
 
 module.exports = {
     addOffer,

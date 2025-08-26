@@ -12,7 +12,7 @@ const Offer = db.Offer
 const OfferItems = db.OfferItems
 const WarehouseChange = db.WarehouseChange
 
-// 1. create item
+//1. KREIRANJE STAVKI - CREATE ITEMS 
 const addOfferItems = async (req, res) => {
   try {
     const items = Array.isArray(req.body) ? req.body : [req.body];
@@ -21,7 +21,7 @@ const addOfferItems = async (req, res) => {
 
     for (let item of items) {
       try {
-        console.log('⏳ Dodajem stavku:', item);
+        console.log('Dodajem stavku:', item);
 
         let info = {
           ID_offerItem: item.ID_offerItem,
@@ -39,53 +39,53 @@ const addOfferItems = async (req, res) => {
         if (info.TypeItem === 'Usluga') info.ID_material = null;
 
         const saved = await OfferItems.create(info);
-        console.log('✅ Uspješno spremljeno:', saved.toJSON());
+        console.log('Uspješno spremljeno:', saved.toJSON());
 
         savedItems.push(saved);
       } catch (err) {
-        console.error('❌ Greška u jednoj od stavki:', err.message);
+        console.error('Greška u jednoj od stavki:', err.message);
       }
     }
 
     res.status(200).send(savedItems);
   } catch (error) {
-    console.error("⚠️ Greška prilikom dodavanja offerItems:", error);
+    console.error("Greška prilikom dodavanja offerItems:", error);
     res.status(500).send({ error: error.message });
   }
 };
 
+// 2. UZIMA SVE STAVKE IZ BAZE - GETS ALL ITEMS FROM BASE
+const getAllOfferItems = async (req, res) => {
+  let offerItems = await OfferItems.findAll({})
+  res.send(offerItems)
+}
 
+//3. UZIMA JEDNU STAVKU IZ BAZE PO ID - GET ONE ITEM OVER ID
+const getOneOfferItem = async (req, res) => {
 
-    // 2. Gets all offerItems from table
-    const getAllOfferItems = async (req, res) => {
-      let offerItems = await OfferItems.findAll({})
-      res.send(offerItems)
-    }
+  let ID_offerItem = req.params.ID_offerItem
+  let offerItems = await OfferItems.findOne({ where: { ID_offerItem: ID_offerItem } })
+  res.status(200).send(offerItems)
+}
 
-    //3. Get one user over id
-    const getOneOfferItem = async (req, res) => {
+//4. AŽURIRA PODATKE STAVKE PO ID - UPDATE ITEM OVER ID
+//OVO TRENUTNO NE TREBA
+const updateOfferItem = async (req, res) => {
+  let ID_offerItem = req.params.ID_offerItem
+  const offerItems = await OfferItems.update(req.body, { where: { ID_offerItem: ID_offerItem } })
+  res.status(200).send(offerItems)
+}
 
-      let ID_offerItem = req.params.ID_offerItem
-      let offerItems = await OfferItems.findOne({ where: { ID_offerItem: ID_offerItem } })
-      res.status(200).send(offerItems)
-    }
+//5. BRISANJE STAVKI PREMA ID - DELETE ITEMS OVER ID
+//trenutno ne treba
+const deleteOfferItem = async (req, res) => {
 
-    //4. update user over id
-    const updateOfferItem = async (req, res) => {
-      let ID_offerItem = req.params.ID_offerItem
-      const offerItems = await OfferItems.update(req.body, { where: { ID_offerItem: ID_offerItem } })
-      res.status(200).send(offerItems)
-    }
+  let ID_offerItem = req.params.ID_offerItem
+  await OfferItems.destroy({ where: { ID_offerItem: ID_offerItem } })
+  res.send('Stavka je obrisana!')
+}
 
-    //5. delete user by id
-    const deleteOfferItem = async (req, res) => {
-
-      let ID_offerItem = req.params.ID_offerItem
-      await OfferItems.destroy({ where: { ID_offerItem: ID_offerItem } })
-      res.send('Stavka je obrisana!')
-    }
-
-    // 8. Get enum values for TypeItem
+// 6. PREUZIMANJE ENUM VRIJEDNOSTI ZA VRSTU STAVKE (MATERIJAL ILI USLUGA) - GETS ENUM VALUE FOR TypeEnum
 const getTypeItemEnum = (req, res) => {
   try {
     if (!OfferItems.rawAttributes.TypeItem) {
@@ -100,11 +100,11 @@ const getTypeItemEnum = (req, res) => {
   }
 };
 
-    module.exports = {
-      addOfferItems,
-      getAllOfferItems,
-      getOneOfferItem,
-      updateOfferItem,
-      deleteOfferItem,
-      getTypeItemEnum
-    }
+module.exports = {
+  addOfferItems,
+  getAllOfferItems,
+  getOneOfferItem,
+  updateOfferItem,
+  deleteOfferItem,
+  getTypeItemEnum
+}
