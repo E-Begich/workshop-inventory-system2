@@ -12,8 +12,6 @@ const receiptItemsController = require('../controllers/receiptItemsController.js
 const supplierController = require('../controllers/supplierController.js')
 const materialsController = require('../controllers/materialsController.js')
 
-
-
 const router = require('express').Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 const authorize = require('../middlewares/authorize'); // putanja do authorize.js
@@ -58,7 +56,6 @@ router.get('/getOfferWithDetails/:ID_offer', authMiddleware, authorize('Offer', 
 router.get("/getActiveOffers", authMiddleware, authorize("Offer", "read"), offerController.getActiveOffers);
 router.get("/getArhivedOffers", authMiddleware, authorize("Offer", "read"), offerController.getArhivedOffers);
 
-
 // Table OfferItems
 router.post('/addOfferItems', authMiddleware, offerItemsController.addOfferItems);
 router.get('/getAllOfferItems', authMiddleware, offerItemsController.getAllOfferItems);
@@ -93,7 +90,6 @@ router.get('/getReceiptWithDetails/:ID_receipt', authMiddleware, receiptControll
 router.get("/getMonthlySales", authMiddleware, receiptController.getMonthlySales);
 router.get("/getTopMaterials", authMiddleware, receiptController.getTopMaterials);
 
-
 //Table ReceiptItems
 router.post('/addReceiptItem', authMiddleware, receiptItemsController.addReceiptItems);
 router.get('/getAllReceiptItem', authMiddleware, receiptItemsController.getAllReceiptItems);
@@ -102,7 +98,6 @@ router.put('/updateReceiptItem/:ID_recItems', authMiddleware, receiptItemsContro
 router.delete('/deleteReceiptItem/:ID_recItems', authMiddleware, receiptItemsController.deleteReceiptItem);
 
 router.get('/getRecTypeItemEnum', authMiddleware, receiptItemsController.getRecTypeItemEnum);
-
 
 //Table Supplier
 router.post('/addSupplier', authMiddleware, supplierController.addSupplier);
@@ -125,8 +120,5 @@ router.get('/getUnitEnum', authMiddleware, materialsController.getUnitEnum);
 router.get('/getTypeChangeEnum', authMiddleware, materialsController.getTypeChangeEnum);
 router.put('/updateMaterialAmount/:ID_material', authMiddleware, materialsController.updateMaterialAmount);
 router.post('/checkMaterialStock', authMiddleware, materialsController.checkMaterialStock);
-
-
-
 
 module.exports = router;
