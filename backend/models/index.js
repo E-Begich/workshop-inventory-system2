@@ -50,8 +50,6 @@ Object.keys(db).forEach(modelName => {
   }
 })
 
-
-
 //dio koji je jako bitan za bazu i omogućuje da se bitne informacije iz baze ne izgube
 db.sequelize.sync({ force: false })
 .then(() => {

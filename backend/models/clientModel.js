@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     PersonalNumber: {
   type: DataTypes.STRING(20),
-  allowNull: true, // općenito je opcionalan
+  allowNull: true,
   validate: {
     isValidPersonalNumber(value) {
       if (this.TypeClient === 'Tvrtka' && (!value || value.trim() === '')) {
@@ -81,7 +81,6 @@ module.exports = (sequelize, DataTypes) => {
     })
 
   }
-
 
   return Client;
 };

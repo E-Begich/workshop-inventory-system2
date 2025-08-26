@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'zaposlenik',
     },
   }, {
-    timestamps: false,  // ako ne koristiš createdAt / updatedAt
+    timestamps: false,
   });
 
   User.associate = (models) => {
@@ -58,5 +58,4 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   return User
-
 }

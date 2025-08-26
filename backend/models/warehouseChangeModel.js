@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     ActionType: {
       type: DataTypes.ENUM(
-        'Dodan novi materijal', //ovo trebam ispraviti + sve u ispisu ispraviti
+        'Dodan novi materijal', //neki od ovih nam trenutno ne trebaju ali je u planu ažuriranje sustava
         'Uređen materijal',
         'Obrisan materijal',
         'Kreirana ponuda',

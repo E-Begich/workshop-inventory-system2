@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     Tax: {
-      type: DataTypes.DECIMAL(12, 2), // npr. 25.00 za 25%
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     PriceTax: {
@@ -61,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     PaymentMethod: {
       type: DataTypes.ENUM('Gotovina', 'Kartica', 'Po ponudi'),
-      allowNull: true, // ili false, ovisno o tvojoj potrebi
+      allowNull: true,
     },
   }, {
     timestamps: false,
