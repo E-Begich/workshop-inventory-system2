@@ -153,7 +153,6 @@ const TopNavBar = () => {
                   <Dropdown.Item className="text-center text-primary" onClick={() => navigate("/showWarehouseChange")}>
                     Pogledaj sve aktivnosti
                   </Dropdown.Item>
-
                 </>
               )}
             </Dropdown.Menu>

@@ -23,51 +23,42 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <i className="fas fa-bars" />
       </Button>
 
-      <div
-        className={`sidebar d-flex flex-column text-white vh-100 p-3 ${isOpen ? "sidebar-open" : ""}`}
-      >
+      <div className={`sidebar d-flex flex-column text-white vh-100 p-3 ${isOpen ? "sidebar-open" : ""}`}>
         <h4 className="mb-4">Ovdje ide logo</h4>
-
         <ul className="nav nav-pills flex-column mb-auto">
           <li className="nav-item mb-2">
             <Link to="/homePage" className="nav-link text-white">
-              <i className="fas fa-tachometer-alt me-2" />
-              Početna
+              <i className="fas fa-tachometer-alt me-2" /> Početna
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllUsers" className="nav-link text-white">
-              <i className="fas fa-user me-2" />
-              Korisnici - zaposlenici
+              <i className="fas fa-user me-2" /> Korisnici - zaposlenici
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllClients" className="nav-link text-white">
-              <i className="fas fa-handshake me-2" />
-              Klijenti
+              <i className="fas fa-handshake me-2" /> Klijenti
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllSupplier" className="nav-link text-white">
-              <i className="fas fa-truck me-2" />
-              Dobavljači
+              <i className="fas fa-truck me-2" /> Dobavljači
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllMaterial" className="nav-link text-white">
-              <i className="fas fa-box me-2" />
-              Materijali
+              <i className="fas fa-box me-2" /> Materijali
             </Link>
           </li>
 
           <li className="nav-item mb-2">
             <Link to="/getAllService" className="nav-link text-white">
-              <i className="fas fa-concierge-bell me-2" />
-              Usluge
+              <i className="fas fa-concierge-bell me-2" /> Usluge
             </Link>
           </li>
 
@@ -76,11 +67,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <Button
               variant="link"
               className="text-white bg-transparent border-0 w-100 text-start d-flex justify-content-between align-items-center"
-              onClick={toggleIzrada}
-            >
+              onClick={toggleIzrada} >
               <span>
-                <i className="fas fa-industry me-2" />
-                Izrada
+                <i className="fas fa-industry me-2" /> Izrada
               </span>
               <i className={`fas fa-chevron-${isIzradaOpen ? "up" : "down"}`} />
             </Button>
@@ -89,14 +78,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <ul className="nav flex-column ms-3">
                 <li className="nav-item mb-1">
                   <Link to="/addOffer" className="nav-link text-white">
-                    <i className="fas fa-file-alt me-2" />
-                    Izrada ponude
+                    <i className="fas fa-file-alt me-2" /> Izrada ponude
                   </Link>
                 </li>
                 <li className="nav-item mb-1">
                   <Link to="/addReceipt" className="nav-link text-white">
-                    <i className="fas fa-file-invoice-dollar me-2" />
-                    Izrada računa
+                    <i className="fas fa-file-invoice-dollar me-2" /> Izrada računa
                   </Link>
                 </li>
               </ul>
@@ -108,11 +95,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <Button
               variant="link"
               className="text-white bg-transparent border-0 w-100 text-start d-flex justify-content-between align-items-center"
-              onClick={togglePovijest}
-            >
+              onClick={togglePovijest}>
               <span>
-                <i className="fas fa-file-alt me-2" />
-                Ponude i računi
+                <i className="fas fa-file-alt me-2" /> Ponude i računi
               </span>
               <i className={`fas fa-chevron-${isPovijestOpen ? "up" : "down"}`} />
             </Button>
@@ -121,20 +106,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <ul className="nav flex-column ms-3">
                 <li className="nav-item mb-1">
                   <Link to="/showOffer" className="nav-link text-white">
-                    <i className="fas fa-list me-2" />
-                    Aktivne ponude
+                    <i className="fas fa-list me-2" /> Aktivne ponude
                   </Link>
                 </li>
                 <li className="nav-item mb-1">
                   <Link to="/showReceipt" className="nav-link text-white">
-                    <i className="fas fa-receipt me-2" />
-                    Računi
+                    <i className="fas fa-receipt me-2" /> Računi
                   </Link>
                 </li>
                 <li className="nav-item mb-1">
                   <Link to="/getArhivedOffers" className="nav-link text-white">
-                    <i className="fas fa-archive" />
-                     Arhivirane ponude
+                    <i className="fas fa-archive" /> Arhivirane ponude
                   </Link>
                 </li>
               </ul>
@@ -143,13 +125,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
           <li className="nav-item mb-2">
             <Link to="/showWarehouseChange" className="nav-link text-white">
-              <i className="fas fa-tasks me-2" />
-              Aktivnosti
+              <i className="fas fa-tasks me-2" /> Aktivnosti
             </Link>
           </li>
         </ul>
 
-        {/* Dugme za zatvaranje sidebar-a */}
+        {/* Gumb za zatvaranje sidebar-a */}
         <Button
           variant="light"
           className="rounded-circle sidebar-close-btn d-md-none"
