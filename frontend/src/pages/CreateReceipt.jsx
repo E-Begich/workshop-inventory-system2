@@ -248,7 +248,7 @@ const CreateReceipt = () => {
         }
 
         try {
-            // ✅ Izračun ukupnog iznosa
+            //Izračun ukupnog iznosa
             const totals = receiptItems.reduce(
                 (acc, item) => {
                     acc.priceNoTax += parseFloat(item.PriceNoTax || 0);
@@ -259,7 +259,7 @@ const CreateReceipt = () => {
             );
             totals.tax = totals.priceTax - totals.priceNoTax;
 
-            // ✅ Spremi račun (zaglavlje)
+            // Spremi račun (zaglavlje)
             const receiptData = {
                 ...form,
                 PriceNoTax: totals.priceNoTax.toFixed(2),
@@ -270,7 +270,7 @@ const CreateReceipt = () => {
             const res = await api.post('/aplication/addReceipt', receiptData);
             const createdReceiptId = res.data.ID_receipt;
 
-            // ✅ Spremi stavke
+            // Spremi stavke
             const itemsToSend = receiptItems.map(item => ({
                 ...item,
                 ID_receipt: createdReceiptId,
@@ -278,7 +278,7 @@ const CreateReceipt = () => {
             }));
             await api.post('/aplication/addReceiptItem', itemsToSend);
 
-            // ✅ Ažuriraj skladište
+            // Ažuriraj skladište
             for (const item of receiptItems) {
                 if (item.TypeItem === 'Materijal') {
                     const material = materials.find(m => m.ID_material === Number(item.ID_material));
@@ -298,7 +298,7 @@ const CreateReceipt = () => {
 
             toast.success('Račun uspješno kreiran!');
 
-            // ✅ Reset formi i podataka
+            // Reset formi i podataka
             setForm({
                 ID_client: '',
                 ID_user: '',
@@ -393,7 +393,6 @@ const CreateReceipt = () => {
         <Card className="p-4 mt-4">
             <ToastContainer />
             <h2 className="text-lg font-semibold mb-4">Kreiraj račun</h2>
-
             <br />
             <Row className="mb-3">
                 {/* Klijent i gumb u istoj liniji */}
@@ -439,9 +438,7 @@ const CreateReceipt = () => {
                         ))}
                     </Form.Select>
                     <Button variant="danger" style={{ whiteSpace: 'nowrap' }}>
-                        <Link to="/getAllUsers" className="nav-link text-white">
-                            Dodaj novog zaposlenika
-                        </Link>
+                        <Link to="/getAllUsers" className="nav-link text-white"> Dodaj novog zaposlenika </Link>
                     </Button>
                 </div>
 

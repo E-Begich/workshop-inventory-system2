@@ -32,7 +32,7 @@ const db = {}
 db.Sequelize = Sequelize
 db.sequelize = sequelize
 
-//ovdje idu nazivi tablica kako se tocno nazivaju u bazi i nazivi fajlova vezano za svaku tablicu posebno. Ti fajlovi nalaze se ovdje u mapi models
+//ovdje idu nazivi tablica kako se tocno nazivaju u bazi i nazivi fajlova vezano za svaku tablicu posebno. Ti fajlovi nalaze se ovdje u direktoriju models
 db.User = require('./userModel.js')(sequelize, DataTypes)
 db.Client = require('./clientModel.js')(sequelize, DataTypes)
 db.Service = require('./serviceModel.js')(sequelize, DataTypes)

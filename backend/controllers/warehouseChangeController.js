@@ -189,7 +189,7 @@ const getUnreadActivityLogs = async (req, res) => {
   }
 };
 
-// 10. GUMB ZA OZNAČABANJE SVIH NOTOFIKACIJA ZA PROČITANE ZAPISE - BUTTON FOR CHECK ALL READ NOTIFICATION
+// 10. GUMB ZA OZNAČABANJE SVIH NOTIFIKACIJA ZA PROČITANE ZAPISE - BUTTON FOR CHECK ALL READ NOTIFICATION
 const markLogsAsRead = async (req, res) => {
   try {
     const [updated] = await WarehouseChange.update(

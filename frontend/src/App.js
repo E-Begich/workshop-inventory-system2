@@ -39,102 +39,18 @@ const Layout = ({ sidebarOpen, toggleSidebar }) => {
             <Route path="/" element={<Navigate to="/login" replace />} />
 
             {/* Sve rute sada traže login */}
-            <Route
-              path="/homePage"
-              element={
-                <PrivateRoute>
-                  <HomePage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/getAllMaterial"
-              element={
-                <PrivateRoute>
-                  <ShowMaterials />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/getAllSupplier"
-              element={
-                <PrivateRoute>
-                  <ShowSupplier />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/getAllUsers"
-              element={
-
-                <ShowUser />
-
-              }
-            />
-            <Route
-              path="/getAllService"
-              element={
-                <PrivateRoute>
-                  <ShowService />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/getAllClients"
-              element={
-                <PrivateRoute>
-                  <ShowClient />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/addOffer"
-              element={
-                <PrivateRoute>
-                  <CreateOffer />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/addReceipt"
-              element={
-                <PrivateRoute>
-                  <CreateReceipt />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/showOffer"
-              element={
-                <PrivateRoute>
-                  <ShowOffer />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/showReceipt"
-              element={
-                <PrivateRoute>
-                  <ShowReceipt />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/getArhivedOffers"
-              element={
-                <PrivateRoute>
-                  <ArhivedOffers />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/showWarehouseChange"
-              element={
-                <PrivateRoute>
-                  <ShowWarehouseChange />
-                </PrivateRoute>
-              }
-            />
+            <Route path="/homePage" element={ <PrivateRoute> <HomePage /> </PrivateRoute> } />
+            <Route path="/getAllMaterial" element={ <PrivateRoute> <ShowMaterials /> </PrivateRoute> }/>
+            <Route path="/getAllSupplier" element={ <PrivateRoute> <ShowSupplier /> </PrivateRoute> } />
+            <Route path="/getAllUsers" element={ <PrivateRoute> <ShowUser /> </PrivateRoute> } />
+            <Route path="/getAllService" element={ <PrivateRoute> <ShowService /> </PrivateRoute> } />
+            <Route path="/getAllClients" element={ <PrivateRoute> <ShowClient /> </PrivateRoute> } />
+            <Route path="/addOffer" element={ <PrivateRoute> <CreateOffer /> </PrivateRoute> }/>
+            <Route path="/addReceipt" element={ <PrivateRoute> <CreateReceipt /> </PrivateRoute> } />
+            <Route path="/showOffer" element={ <PrivateRoute> <ShowOffer /> </PrivateRoute> } />
+            <Route path="/showReceipt" element={ <PrivateRoute> <ShowReceipt /> </PrivateRoute> } />
+            <Route path="/getArhivedOffers" element={ <PrivateRoute> <ArhivedOffers /> </PrivateRoute> } />
+            <Route path="/showWarehouseChange" element={ <PrivateRoute> <ShowWarehouseChange /> </PrivateRoute> } />
           </Routes>
         </div>
       </div>

@@ -3,19 +3,24 @@ import { Button, Form, Table, Row, Col, Card } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import api from '../api/api';
+import api from '../api/api'; //za komunikaciju sa backendom
 //import axios from "axios";
 //import { jwtDecode } from "jwt-decode";
 
 
 const CreateOffer = () => {
+    //čuvaju se podaci dohvaćeni s API-ja
+    // form čuva podatke o ponudi
+    // newItem privremeno čuva podatke prije nego se dodaju u ponudu
+    // offerItems lista svih stavki dodanih u ponudu, editingIndex prati koja se stavka uređuje
     const [materials, setMaterials] = useState([]);
     const [service, setService] = useState([]);
     const [clients, setClients] = useState([]);
     const [users, setUsers] = useState([]);
+
     const [typeEnum, setTypeEnum] = useState([]);
     const [offerItems, setOfferItems] = useState([]);
-    const [editingIndex, setEditingIndex] = useState(null); // indeks stavke koja se uređuje
+    const [editingIndex, setEditingIndex] = useState(null);
     const [form, setForm] = useState({
         ID_client: '',
         ID_user: '',
@@ -39,7 +44,7 @@ const CreateOffer = () => {
     const today = () => new Date().toISOString().split('T')[0];
     const addDays = (n) => new Date(Date.now() + n * 86400000).toISOString().split('T')[0];
 
-
+//pokreće se prilikom prvog renderiranja te dohvaća podatke s API-a te iz JWT tokena izvlači korsisnika i postavlja u formu
     useEffect(() => {
         fetchClients();
         fetchUsers();
@@ -50,7 +55,7 @@ const CreateOffer = () => {
         // Dohvati trenutno prijavljenog korisnika iz tokena
         const token = localStorage.getItem('token');
         if (token) {
-            const payload = JSON.parse(atob(token.split('.')[1])); // jednostavan JWT decode
+            const payload = JSON.parse(atob(token.split('.')[1]));
             setForm(prev => ({ ...prev, ID_user: payload.ID_user }));
         }
     }, []);
@@ -101,7 +106,7 @@ const CreateOffer = () => {
 
         }
     };
-
+// provjerava jesu li uneseni svi podaci, izračunava cijene, dodaje stavke u offerItems te vrši reset forme za novi unos
     const handleAddItem = () => {
         const { ID_material, ID_service, Amount, TypeItem } = newItem;
         // Validacija
@@ -128,7 +133,7 @@ const CreateOffer = () => {
         } else if (ID_service) {
             const svc = service.find(s => s.ID_service === Number(ID_service));
             if (svc) {
-                unitPrice = parseFloat(svc.PriceNoTax || 0);  // ili SellingPrice, ovisno o bazi
+                unitPrice = parseFloat(svc.PriceNoTax || 0); 
                 taxRate = parseFloat(svc.Tax || 25);
                 // console.log("Pronađena usluga:", svc);
             }
@@ -158,11 +163,11 @@ const CreateOffer = () => {
             TypeItem: '',
             Amount: '',
             PriceNoTax: 0,
-            Tax: 25,          // vrati default PDV
+            Tax: 25,
             PriceTax: 0,
         });
     };
-
+// validira sve stavke, računa ukupne cijene ponude, sprema ponudu
     const handleSubmitOffer = async () => {
         for (const item of offerItems) {
             if (!item.TypeItem || !item.Amount || (!item.ID_material && !item.ID_service)) {
@@ -339,9 +344,7 @@ const CreateOffer = () => {
                     ))}
                 </Form.Select>
                 <Button variant="danger" style={{ whiteSpace: 'nowrap' }}>
-                    <Link to="/getAllClients" className="nav-link text-white">
-                        Dodaj novog klijenta
-                    </Link>
+                    <Link to="/getAllClients" className="nav-link text-white"> Dodaj novog klijenta </Link>
                 </Button>
             </div>
 
@@ -705,9 +708,7 @@ const CreateOffer = () => {
 
 
             <div className="text-end mt-3">
-                <Button variant="danger" onClick={handleSubmitOffer} className="ms-3">
-                    Kreiraj ponudu
-                </Button>
+                <Button variant="danger" onClick={handleSubmitOffer} className="ms-3"> Kreiraj ponudu </Button>
                 <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />
             </div>
         </Card>
