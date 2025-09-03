@@ -636,21 +636,8 @@ const CreateOffer = () => {
                                     <td>{totalTax.toFixed(2)}</td>
                                     <td>{totalPriceTax.toFixed(2)}</td>
                                     <td>
-                                        <Button
-                                            size="sm"
-                                            variant="warning"
-                                            className="me-2"
-                                            onClick={() => startEditing(index)}
-                                        >
-                                            Uredi
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="danger"
-                                            onClick={() => deleteItem(index)}
-                                        >
-                                            Obriši
-                                        </Button>
+                                        <Button size="sm" variant="warning" className="me-2" onClick={() => startEditing(index)} > Uredi </Button>
+                                        <Button size="sm" variant="danger"  onClick={() => deleteItem(index)} > Obriši </Button>
                                     </td>
                                 </tr>
                             );

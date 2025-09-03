@@ -172,7 +172,7 @@ const CreateReceipt = () => {
     };
 
     const handleSubmitReceipt = async () => {
-        // ✅ Validacija osnovnih podataka
+        // Validacija osnovnih podataka
         if (!form.ID_client || !form.ID_user || !form.DateCreate || !form.PaymentMethod) {
             toast.error('Molimo popunite sve podatke o računu.');
             return;
@@ -183,7 +183,7 @@ const CreateReceipt = () => {
             return;
         }
 
-        // ✅ Provjera dostupnosti materijala (preko API-ja)
+        // Provjera dostupnosti materijala (preko API-ja)
         for (const item of receiptItems) {
             if (item.ID_material) {
                 try {
@@ -207,7 +207,7 @@ const CreateReceipt = () => {
             }
         }
 
-        // ✅ Validacija pojedinačnih stavki
+        // Validacija pojedinačnih stavki
         for (const item of receiptItems) {
             if (
                 !item.TypeItem ||
@@ -220,7 +220,7 @@ const CreateReceipt = () => {
             }
         }
 
-        // ✅ Provjera skladišta prije zaključivanja
+        // Provjera skladišta prije zaključivanja
         const insufficient = [];
         const lowStock = [];
 

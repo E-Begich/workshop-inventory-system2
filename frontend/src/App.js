@@ -38,7 +38,7 @@ const Layout = ({ sidebarOpen, toggleSidebar }) => {
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
 
-            {/* Sve rute sada traže login */}
+            {/* Sve rute koje traže login */}
             <Route path="/homePage" element={ <PrivateRoute> <HomePage /> </PrivateRoute> } />
             <Route path="/getAllMaterial" element={ <PrivateRoute> <ShowMaterials /> </PrivateRoute> }/>
             <Route path="/getAllSupplier" element={ <PrivateRoute> <ShowSupplier /> </PrivateRoute> } />

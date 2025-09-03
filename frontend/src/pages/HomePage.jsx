@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Card, Table, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Table, Button, Modal } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,10 @@ const HomePage = () => {
   const [receipts, setReceipts] = useState([]);
   const [clients, setClients] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [showYearChart, setShowYearChart] = useState(false);
+  const [chartDataYear, setChartDataYear] = useState(null);
+
+
   const navigate = useNavigate();
 
   const fetchReceipts = async () => {
@@ -64,7 +68,7 @@ const HomePage = () => {
         const diff = (day === 0 ? -6 : 1) - day;
         const monday = new Date(d);
         monday.setDate(d.getDate() + diff);
-        monday.setHours(0,0,0,0);
+        monday.setHours(0, 0, 0, 0);
         return monday;
       };
       const mondayThisWeek = getMonday(today);
@@ -72,7 +76,7 @@ const HomePage = () => {
       mondayLastWeek.setDate(mondayThisWeek.getDate() - 7);
       const sundayLastWeek = new Date(mondayThisWeek);
       sundayLastWeek.setDate(mondayThisWeek.getDate() - 1);
-      sundayLastWeek.setHours(23,59,59,999);
+      sundayLastWeek.setHours(23, 59, 59, 999);
 
       let currentWeekCount = 0, lastWeekCount = 0;
       data.forEach(r => {
@@ -84,7 +88,7 @@ const HomePage = () => {
       setLastWeekReceipts(lastWeekCount);
 
       // Zadnjih 5 računa
-      const last5 = [...data].sort((a,b) => new Date(b.DateReceipt) - new Date(a.DateReceipt)).slice(0,5);
+      const last5 = [...data].sort((a, b) => new Date(b.DateReceipt) - new Date(a.DateReceipt)).slice(0, 5);
       setReceipts(last5);
 
     } catch (err) {
@@ -104,16 +108,16 @@ const HomePage = () => {
       const data = await res.json();
       const offers = Array.isArray(data) ? data : data.offers || [];
       const today = new Date();
-      today.setHours(0,0,0,0);
+      today.setHours(0, 0, 0, 0);
 
       let active = 0, expiring = 0;
       offers.forEach(o => {
         const hasReceipt = o.HasReceipt;
         const endDate = new Date(o.DateEnd);
-        endDate.setHours(0,0,0,0);
+        endDate.setHours(0, 0, 0, 0);
         if (!hasReceipt && endDate >= today) {
           active++;
-          const diffDays = Math.ceil((endDate - today)/(1000*60*60*24));
+          const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
           if (diffDays <= 2) expiring++;
         }
       });
@@ -136,7 +140,7 @@ const HomePage = () => {
       setTotalMaterials(materials.length);
       const lowStockCount = materials.filter(m => parseFloat(m.Amount) <= parseFloat(m.MinAmount)).length;
       setLowStock(lowStockCount);
-    } catch(err) {
+    } catch (err) {
       console.error("Greška kod materijala:", err);
       setTotalMaterials(0);
       setLowStock(0);
@@ -161,7 +165,7 @@ const HomePage = () => {
           backgroundColor: "rgba(75,192,192,0.6)"
         }]
       });
-    } catch(err) {
+    } catch (err) {
       console.error("Greška kod mjesečne prodaje:", err);
       setChartData(null);
     }
@@ -176,12 +180,12 @@ const HomePage = () => {
       const chartData = {
         labels: data.map(m => m.NameMaterial),
         datasets: [
-          { label: 'Minimalna količina', data: data.map(m=>m.MinAmount), backgroundColor: 'rgba(255,99,132,0.5)' },
-          { label: 'Stvarna količina', data: data.map(m=>m.Amount), backgroundColor: 'rgba(54,162,235,0.7)' }
+          { label: 'Minimalna količina', data: data.map(m => m.MinAmount), backgroundColor: 'rgba(255,99,132,0.5)' },
+          { label: 'Stvarna količina', data: data.map(m => m.Amount), backgroundColor: 'rgba(54,162,235,0.7)' }
         ]
       };
       setTopMaterialsData(chartData);
-    } catch(err) {
+    } catch (err) {
       console.error('Greška kod top materijala:', err);
       setTopMaterialsData(null);
     }
@@ -194,7 +198,7 @@ const HomePage = () => {
       });
       const data = await res.json();
       setClients(Array.isArray(data) ? data : []);
-    } catch(err) {
+    } catch (err) {
       console.error("Greška kod klijenata:", err);
       setClients([]);
     }
@@ -207,11 +211,39 @@ const HomePage = () => {
       });
       const data = await res.json();
       setLogs(Array.isArray(data) ? data : []);
-    } catch(err) {
+    } catch (err) {
       console.error("Greška kod activity logova:", err);
       setLogs([]);
     }
   };
+
+  const fetchYearlyChartData = async () => {
+    try {
+      const res = await fetch("/api/aplication/getMonthlySales", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      if (!Array.isArray(data)) return;
+
+      // Pretpostavljam da backend vraća polja { month, year, total }
+      const last12 = data.slice(-12);
+      const labels = last12.map(i => `${i.month} - ${i.year}`);
+      const totals = last12.map(i => Number(i.total));
+
+      setChartDataYear({
+        labels,
+        datasets: [{
+          label: "Prodaja (€)",
+          data: totals,
+          backgroundColor: "rgba(75,192,192,0.6)",
+        }]
+      });
+    } catch (err) {
+      console.error("Greška kod godišnje prodaje:", err);
+      setChartDataYear(null);
+    }
+  };
+
 
   useEffect(() => {
     fetchReceipts();
@@ -221,6 +253,7 @@ const HomePage = () => {
     fetchTopMaterials();
     fetchClients();
     fetchLogs();
+    fetchYearlyChartData();
   }, []);
 
   const getClientName = (id) => {
@@ -238,6 +271,17 @@ const HomePage = () => {
   };
 
   const smallText = { fontSize: "0.5em", color: "gray" };
+
+  const chartOptionsYear = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: "top" },
+      title: { display: true, text: "Prodaja po mjesecima (1 godina)" },
+    },
+  };
+
+
 
   return (
     <Container fluid className="p-4">
@@ -300,7 +344,16 @@ const HomePage = () => {
         <Col md={8}>
           <Card className="shadow-sm">
             <Card.Body>
-              <h5>Prodaja po mjesecima</h5>
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h5 className="mb-0">Prodaja po mjesecima</h5>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={() => setShowYearChart(true)}
+                >
+                  Prikaži zadnjih 12 mjeseci
+                </Button>
+              </div>
               <div style={{ height: "250px", backgroundColor: "#f8f9fa" }}>
                 {chartData && <Bar data={chartData} options={chartOptions} />}
               </div>
@@ -414,7 +467,24 @@ const HomePage = () => {
           </Card>
         </Col>
       </Row>
+      <Modal show={showYearChart} onHide={() => setShowYearChart(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Prodaja u zadnjih 12 mjeseci</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div style={{ height: "400px" }}>
+            {chartDataYear && <Bar data={chartDataYear} options={chartOptionsYear} />}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowYearChart(false)}>
+            Zatvori
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
     </Container >
+
   );
 };
 

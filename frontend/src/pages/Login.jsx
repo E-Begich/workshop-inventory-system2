@@ -43,8 +43,8 @@ const Login = () => {
     if (!password) {
       setPasswordError("Molimo unesite lozinku.");
       valid = false;
-    } else if (password.length < 6) {
-      setPasswordError("Lozinka mora imati barem 6 znakova.");
+    } else if (password.length < 8) {
+      setPasswordError("Lozinka mora imati minimalno 8 znakova.");
       valid = false;
     }
 
@@ -207,7 +207,8 @@ const Login = () => {
           zIndex: 1000,
         }}
       >
-        <div>© 2025. Sva prava pridržana.</div>
+        <div>© 2025. Sva prava pridržana. Diplomski rad,  Veleučilište u Rijeci, izradila Emina Begić.</div>
+
       </footer>
 
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />

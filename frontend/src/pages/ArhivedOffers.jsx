@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Spinner } from "react-bootstrap";
+import { Table, Button, Spinner, Modal } from "react-bootstrap";
 import { FaTrash } from "react-icons/fa";
 import api from "../api/api";
 import { toast } from "react-toastify";
@@ -11,6 +11,9 @@ const ArhivedOffers = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedOfferId, setSelectedOfferId] = useState(null);
 
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
 
@@ -50,7 +53,6 @@ const ArhivedOffers = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Jeste li sigurni da želite obrisati ovu ponudu?")) return;
     try {
       await api.delete(`/aplication/deleteOffer/${id}`);
       setOffers(prev => prev.filter(offer => offer.ID_offer !== id));
@@ -137,7 +139,14 @@ const ArhivedOffers = () => {
                 <td>{Number(offer.PriceTax).toFixed(2)} €</td>
                 <td>{getUserName(offer.ID_user)}</td>
                 <td>
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(offer.ID_offer)}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedOfferId(offer.ID_offer);
+                      setShowDeleteConfirm(true);
+                    }}
+                  >
                     <FaTrash /> Obriši
                   </Button>
                 </td>
@@ -146,6 +155,29 @@ const ArhivedOffers = () => {
           </tbody>
         </Table>
       )}
+      <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Potvrda brisanja</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Jeste li sigurni da želite obrisati ovu ponudu?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
+            Odustani
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              handleDelete(selectedOfferId);
+              setShowDeleteConfirm(false);
+            }}
+          >
+            Obriši
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
     </div>
   );
 };
