@@ -65,116 +65,126 @@ const ShowWarehouseChange = () => {
     setSortConfig({ key, direction });
   };
 
+const formatDateTime = (dateString) => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
+};
+
 
   return (
-  <div className="container px-3 mt-4">
-    {/* Naslov */}
-    <div className="row align-items-center mb-3">
-      <div className="col-12 col-md">
-        <h2 className="mb-0">Pregled promjena</h2>
+    <div className="container px-3 mt-4">
+      {/* Naslov */}
+      <div className="row align-items-center mb-3">
+        <div className="col-12 col-md">
+          <h2 className="mb-0">Pregled promjena</h2>
+        </div>
       </div>
-    </div>
 
-    {/* Filteri */}
-    <div className="row g-3 mb-3">
-      <div className="col-12 col-md-6 col-lg-4">
-        <label className="form-label">Filtriraj po tipu entiteta:</label>
-        <select
-          value={filterType}
-          onChange={(e) => {
-            setFilterType(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="form-select"
-        >
-          <option value="">Svi</option>
-          <option value="Materijal">Materijal</option>
-          <option value="Ponuda">Ponuda</option>
-          <option value="Racun">Račun</option>
-          <option value="Klijent">Klijent</option>
-          <option value="Dobavljac">Dobavljač</option>
-        </select>
+      {/* Filteri */}
+      <div className="row g-3 mb-3">
+        <div className="col-12 col-md-6 col-lg-4">
+          <label className="form-label">Filtriraj po tipu entiteta:</label>
+          <select
+            value={filterType}
+            onChange={(e) => {
+              setFilterType(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="form-select"
+          >
+            <option value="">Svi</option>
+            <option value="Materijal">Materijal</option>
+            <option value="Ponuda">Ponuda</option>
+            <option value="Racun">Račun</option>
+            <option value="Klijent">Klijent</option>
+            <option value="Dobavljac">Dobavljač</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    {/* TABLICA */}
-    <div className="table-responsive">
-      <Table striped bordered hover size="sm" className="mb-3">
-        <thead>
-          <tr>
-            {[
-              { label: 'Datum', key: 'ChangeDate' },
-              { label: 'Korisnik', key: 'ID_user' },
-              { label: 'Akcija', key: 'ActionType' },
-              { label: 'Entitet', key: 'ObjectType' },
-              { label: 'ID', key: 'ObjectID' },
-              { label: 'Naziv/broj', key: 'EntityName' },
-              { label: 'Dodatno', key: 'Amount' },
-              { label: 'Napomena', key: 'Note' },
-            ].map(({ label, key }) => (
-              <th
-                key={key}
-                onClick={() => handleSort(key)}
-                style={{ cursor: 'pointer' }}
-              >
-                {label}{' '}
-                <span style={{ color: sortConfig.key === key ? 'black' : '#ccc' }}>
-                  {sortConfig.key === key
-                    ? sortConfig.direction === 'asc'
-                      ? '▲'
-                      : '▼'
-                    : '▲▼'}
-                </span>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {currentChanges.map((c) => (
-            <tr key={c.ID_change}>
-              <td>{new Date(c.ChangeDate).toLocaleString()}</td>
-              <td>{c.User?.Name || c.ID_user}</td>
-              <td>{c.ActionType}</td>
-              <td>{c.ObjectType}</td>
-              <td>{c.ObjectID}</td>
-              <td>{c.EntityName || '-'}</td>
-              <td>{c.Amount ?? '-'}</td>
-              <td>{c.Note || '-'}</td>
+      {/* TABLICA */}
+      <div className="table-responsive">
+        <Table striped bordered hover size="sm" className="mb-3">
+          <thead>
+            <tr>
+              {[
+                { label: 'Datum', key: 'ChangeDate' },
+                { label: 'Korisnik', key: 'ID_user' },
+                { label: 'Akcija', key: 'ActionType' },
+                { label: 'Entitet', key: 'ObjectType' },
+                { label: 'ID', key: 'ObjectID' },
+                { label: 'Naziv/broj', key: 'EntityName' },
+                { label: 'Dodatno', key: 'Amount' },
+                { label: 'Napomena', key: 'Note' },
+              ].map(({ label, key }) => (
+                <th
+                  key={key}
+                  onClick={() => handleSort(key)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {label}{' '}
+                  <span style={{ color: sortConfig.key === key ? 'black' : '#ccc' }}>
+                    {sortConfig.key === key
+                      ? sortConfig.direction === 'asc'
+                        ? '▲'
+                        : '▼'
+                      : '▲▼'}
+                  </span>
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </Table>
-    </div>
+          </thead>
+          <tbody>
+            {currentChanges.map((c) => (
+              <tr key={c.ID_change}>
+                <td>{formatDateTime(c.ChangeDate)}</td>
+                <td>{c.User?.Name || c.ID_user}</td>
+                <td>{c.ActionType}</td>
+                <td>{c.ObjectType}</td>
+                <td>{c.ObjectID}</td>
+                <td>{c.EntityName || '-'}</td>
+                <td>{c.Amount ?? '-'}</td>
+                <td>{c.Note || '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
 
-    {/* PAGINACIJA */}
-    <div className="row align-items-center mt-3 px-2">
-      <div className="col-12 col-md-6 mb-2 mb-md-0">
-        Prikazuje se {filteredChanges.length === 0 ? 0 : indexOfFirst + 1} -{' '}
-        {Math.min(indexOfLast, filteredChanges.length)} od {filteredChanges.length} promjena
-      </div>
-      <div className="col-12 col-md-6 text-md-end">
-        <Button
-          variant="secondary"
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(prev => prev - 1)}
-          className="me-2"
-        >
-          Prethodna
-        </Button>
-        <span className="align-middle mx-2">
-          Stranica {currentPage} / {totalPages}
-        </span>
-        <Button
-          variant="secondary"
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(prev => prev + 1)}
-          className="ms-2"
-        >
-          Sljedeća
-        </Button>
+      {/* PAGINACIJA */}
+      <div className="row align-items-center mt-3 px-2">
+        <div className="col-12 col-md-6 mb-2 mb-md-0">
+          Prikazuje se {filteredChanges.length === 0 ? 0 : indexOfFirst + 1} -{' '}
+          {Math.min(indexOfLast, filteredChanges.length)} od {filteredChanges.length} promjena
+        </div>
+        <div className="col-12 col-md-6 text-md-end">
+          <Button
+            variant="secondary"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(prev => prev - 1)}
+            className="me-2"
+          >
+            Prethodna
+          </Button>
+          <span className="align-middle mx-2">
+            Stranica {currentPage} / {totalPages}
+          </span>
+          <Button
+            variant="secondary"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(prev => prev + 1)}
+            className="ms-2"
+          >
+            Sljedeća
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-);
- };
- export default ShowWarehouseChange;
+  );
+};
+export default ShowWarehouseChange;

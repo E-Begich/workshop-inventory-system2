@@ -281,6 +281,15 @@ const HomePage = () => {
     },
   };
 
+  const formatDateTime = (dateString) => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
+};
 
 
   return (
@@ -444,7 +453,7 @@ const HomePage = () => {
                         <td>{c.User?.Name || c.User?.Username || c.ID_user}</td>
                         <td>{c.ActionType}</td>
                         <td>{c.EntityName || c.ObjectType}</td>
-                        <td>{new Date(c.ChangeDate).toLocaleString()}</td>
+                        <td>{formatDateTime(c.ChangeDate)}</td>
                       </tr>
                     ))
                   ) : (
