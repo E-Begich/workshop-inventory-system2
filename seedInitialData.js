@@ -12,7 +12,7 @@ const seed = async () => {
             { Name: 'Marko', Lastname: 'Horvat', Email: 'marko.horvat@example.com', Password: hashedPassword, Role: 'admin', Contact: '0123456789' },
             { Name: 'Ivana', Lastname: 'Kovačević', Email: 'ivana.kovacevic@example.com', Password: hashedPassword, Role: 'zaposlenik', Contact: '0987654321' },
             { Name: 'Luka', Lastname: 'Babić', Email: 'luka.babic@example.com', Password: hashedPassword, Role: 'zaposlenik', Contact: '0912345678' },
-        ]);
+        ], { ignoreDuplicates: true });
 
         // ----- KLIJENTI -----
         await Client.bulkCreate([
@@ -20,14 +20,14 @@ const seed = async () => {
             { TypeClient: 'Fizička osoba', ContactName: 'Petar Jurić', Contact: '0123456782', Email: 'petar.juric@example.com', Address: 'Splitska 45', City: 'Split', PostalCode: '21000', Country: 'Hrvatska' },
             { TypeClient: 'Tvrtka', Name: 'TechNova d.o.o.', PersonalNumber: '12345678901', ContactName: 'Marija Novak', Contact: '0123456781', Email: 'marija.novak@example.com', Address: 'Dravska 7', City: 'Osijek', PostalCode: '31000', Country: 'Hrvatska' },
             { TypeClient: 'Tvrtka', Name: 'GreenBuild j.d.o.o.', PersonalNumber: '98765432109', ContactName: 'Ivan Radić', Contact: '0123456785', Email: 'ivan.radic@example.com', Address: 'Riječka 3', City: 'Rijeka', PostalCode: '51000', Country: 'Hrvatska' }
-        ]);
+        ], { ignoreDuplicates: true });
 
         // ----- DOBAVLJAČI -----
         await Supplier.bulkCreate([
             { Type: 'Fizička osoba', ContactName: 'Tomislav Kranjčec', Contact: '789654123', Email: 'tomislav.kranjcec@example.com', Address: 'Savska 22', City: 'Zagreb', PostalCode: '10000', Country: 'Hrvatska' },
             { Type: 'Tvrtka', Name: 'SolarTech d.o.o.', PersonalNumber: '45678912345', ContactName: 'Lea Perić', Contact: '45678963', Email: 'lea.peric@example.com', Address: 'Obala 10', City: 'Split', PostalCode: '21000', Country: 'Hrvatska' },
             { Type: 'Tvrtka', Name: 'AquaSystems j.d.o.o.', PersonalNumber: '32165498701', ContactName: 'Mateo Lončar', Contact: '45632102', Email: 'mateo.loncar@example.com', Address: 'Ulica slobode 5', City: 'Rijeka', PostalCode: '51000', Country: 'Hrvatska' }
-        ]);
+        ], { ignoreDuplicates: true });
 
         // ----- MATERIJALI -----
         await Materials.bulkCreate([
@@ -39,7 +39,7 @@ const seed = async () => {
             { NameMaterial: 'Koža plava', CodeMaterial: 'koza603', Amount: 150.00, Unit: 'M/2', Location: 'Skladište 2', Description: 'mekana plava koža', MinAmount: 15.00, PurchasePrice: 80.00, SellingPrice: 120.00, TypeChange: 'Nabava', ID_supplier: 3 },
             { NameMaterial: 'Tkanina pamuk siva', CodeMaterial: 'tkani604', Amount: 400.00, Unit: 'M', Location: 'Skladište 1', Description: 'mekana pamuk tkanina', MinAmount: 30.00, PurchasePrice: 6.00, SellingPrice: 15.00, TypeChange: 'Nabava', ID_supplier: 1 },
             { NameMaterial: 'Koža smeđa glatka', CodeMaterial: 'koza605', Amount: 200.00, Unit: 'M/2', Location: 'Skladište 3', Description: 'premium smeđa glatka koža', MinAmount: 15.00, PurchasePrice: 75.00, SellingPrice: 115.00, TypeChange: 'Nabava', ID_supplier: 2 }
-        ]);
+        ], { ignoreDuplicates: true });
 
         // ----- USLUGE -----
         await Service.bulkCreate([
@@ -50,7 +50,7 @@ const seed = async () => {
             { ID_service: 5, Name: 'Popravak sjedala automobila', Description: 'manji popravci i šivanje', PriceNoTax: 40.00, Tax: 25.00, PriceTax: 50.00 },
             { ID_service: 6, Name: 'Tapeciranje sofe', Description: 'zamjena pjene i tkanine', PriceNoTax: 120.00, Tax: 25.00, PriceTax: 150.00 },
             { ID_service: 7, Name: 'Šivanje jastuka', Description: 'izrada i šivanje dekorativnih jastuka', PriceNoTax: 20.00, Tax: 25.00, PriceTax: 25.00 }
-        ]);
+        ], { ignoreDuplicates: true });
 
         // ----- OFFERS -----
         await Offer.bulkCreate([
@@ -61,9 +61,14 @@ const seed = async () => {
             { ID_client: 2, DateCreate: "2025-08-17", DateEnd: "2025-08-31", PriceNoTax: 120.00, Tax: 25.00, PriceTax: 150.00, ID_user: 2, HasReceipt: false },
             { ID_client: 3, DateCreate: "2025-08-17", DateEnd: "2025-08-31", PriceNoTax: 40.00, Tax: 25.00, PriceTax: 50.00, ID_user: 1, HasReceipt: false },
             { ID_client: 1, DateCreate: "2025-08-21", DateEnd: "2025-09-04", PriceNoTax: 200.00, Tax: 25.00, PriceTax: 250.00, ID_user: 3, HasReceipt: false },
-            { ID_client: 2, DateCreate: "2025-08-25", DateEnd: "2025-09-08", PriceNoTax: 80.00, Tax: 25.00, PriceTax: 100.00, ID_user: 2, HasReceipt: false }
+            { ID_client: 2, DateCreate: "2025-08-25", DateEnd: "2025-09-08", PriceNoTax: 80.00, Tax: 25.00, PriceTax: 100.00, ID_user: 2, HasReceipt: false },
+            { ID_client: 3, DateCreate: "2025-09-11", DateEnd: "2025-09-26", PriceNoTax: 40.00, Tax: 25.00, PriceTax: 50.00, ID_user: 1, HasReceipt: false },
+            { ID_client: 2, DateCreate: "2025-09-11", DateEnd: "2025-09-26", PriceNoTax: 200.00, Tax: 25.00, PriceTax: 250.00, ID_user: 3, HasReceipt: false },
+            { ID_client: 1, DateCreate: "2025-09-12", DateEnd: "2025-09-27", PriceNoTax: 80.00, Tax: 25.00, PriceTax: 100.00, ID_user: 2, HasReceipt: false }
 
-        ]);
+        ], {
+            ignoreDuplicates: true
+        });
 
         // ----- OFFER ITEMS -----
         // ⚠️ ako koristiš AUTO_INCREMENT za ID_offer, moraš provjeriti koji ID-evi su stvarno dodijeljeni
@@ -97,8 +102,19 @@ const seed = async () => {
             // Ponuda 8 -> 1 materijal + 2 usluge
             { ID_offer: 8, TypeItem: "Materijal", ID_material: 7, ID_service: null, Amount: 4, PriceNoTax: 60.00, Tax: 15.00, PriceTax: 75.00 },
             { ID_offer: 8, TypeItem: "Usluga", ID_material: null, ID_service: 6, Amount: 1, PriceNoTax: 120.00, Tax: 30.00, PriceTax: 150.00 },
-            { ID_offer: 8, TypeItem: "Usluga", ID_material: null, ID_service: 7, Amount: 2, PriceNoTax: 40.00, Tax: 10.00, PriceTax: 50.00 }
-        ]);
+            { ID_offer: 8, TypeItem: "Usluga", ID_material: null, ID_service: 7, Amount: 2, PriceNoTax: 40.00, Tax: 10.00, PriceTax: 50.00 },
+
+            // Ponuda 9 (nova)
+            { ID_offer: 9, TypeItem: "Materijal", ID_material: 8, ID_service: null, Amount: 1, priceNoTax: 40.00, tax: 10.00, priceTax: 50.00 },
+
+            // Ponuda 10 (nova)
+            { ID_offer: 10, TypeItem: "Usluga", ID_material: null, ID_service: 8, Amount: 1, priceNoTax: 200.00, tax: 50.00, priceTax: 250.00 },
+
+            // Ponuda 11 (nova)
+            { ID_offer: 11, TypeItem: "Materijal", ID_material: 9, ID_service: null, Amount: 1, priceNoTax: 80.00, tax: 20.00, priceTax: 100.00 }
+        ], {
+            ignoreDuplicates: true
+        });
 
         // ----- RECEIPTS -----
         await Receipt.bulkCreate([
@@ -116,7 +132,7 @@ const seed = async () => {
             // RUJAN
             { ID_receipt: 8, ReceiptNumber: "R-2025-00008", ID_client: 2, DateCreate: "2025-09-01", PriceNoTax: 100.00, Tax: 25.00, PriceTax: 125.00, ID_offer: 8, ID_user: 2, PaymentMethod: "Gotovina" },
             { ID_receipt: 9, ReceiptNumber: "R-2025-00009", ID_client: 1, DateCreate: "2025-09-03", PriceNoTax: 250.00, Tax: 62.50, PriceTax: 312.50, ID_offer: 1, ID_user: 1, PaymentMethod: "Kartica" }
-        ]);
+        ], { ignoreDuplicates: true });
 
         // ----- RECEIPT ITEMS -----
         await ReceiptItems.bulkCreate([
@@ -141,7 +157,7 @@ const seed = async () => {
             // RUJAN
             { ID_recItems: 9, ID_receipt: 8, TypeItem: "Materijal", ID_material: 1, ID_service: null, Amount: 2, PriceNoTax: 100.00, Tax: 25.00, PriceTax: 125.00 },
             { ID_recItems: 10, ID_receipt: 9, TypeItem: "Usluga", ID_material: null, ID_service: 6, Amount: 2, PriceNoTax: 250.00, Tax: 62.50, PriceTax: 312.50 }
-        ]);
+        ], { ignoreDuplicates: true });
 
 
 
