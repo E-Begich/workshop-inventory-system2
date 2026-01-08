@@ -1,8 +1,8 @@
 module.exports = {
-  HOST: "student.veleri.hr",
-  USER: "ebegic1",
-  PASSWORD: "11",
-  DB: "ebegic1",
+  HOST: "sql100.infinityfree.com",
+  USER: "if0_40859394",
+  PASSWORD: "21Prosinac1990",
+  DB: "if0_40859394_ebegic1",
   dialect: "mysql",
   dialectModule: require("mysql2"),
   pool: {

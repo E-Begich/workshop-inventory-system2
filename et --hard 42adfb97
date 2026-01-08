@@ -1,0 +1,48 @@
+[33m90a5cfac[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m Deploy frontend build to root for GitHub Pages
+[33m47772728[m[33m ([m[1;31morigin/master[m[33m)[m deploy 3
+[33m9cecddd3[m deploy 2
+[33ma443425d[m deploy
+[33m42adfb97[m dodavanje ponuda u bazu radi datuma isteka, kako bi se simulirao stvarni sustav
+[33m4c944438[m format ispisa datuma u logovima
+[33m7576edeb[m dodavanje podataka unutar baze
+[33m887472e8[m uređivanje koda part 2
+[33m13893787[m components - uređivanje koda
+[33m010e673b[m routes - dodavanje komentara
+[33m596142cc[m models - uređivanje koda
+[33m8facb510[m uređivanje koda i dodavanje komentara hr-eng za controllere
+[33me19f5b4a[m offers i receipts- za izradu uzima se aktivni korisnik
+[33ma4ab3d97[m sidebar-ikone, sortiranje računa i ponuda,  skripta za unos podataka - ponude
+[33mc3f1d080[m napravljena skripta za unos podataka u bazu
+[33m7c842c2b[m Dodavanje arhiviranih ponuda
+[33me57711ea[m Dodavanje ograničenja ulogama
+[33mc9875696[m promjena decimal broja na 12,2 zbog ograničenja na količinu
+[33m83b08656[m TopNavBar - notofikacije o ažuriranjima
+[33mdc553eec[m Responzivnost tablica
+[33m52468323[m Ažuriran ActionType za WarehouseChange
+[33mba05f39b[m Homepage - activityLog -radi
+[33mc42fed99[m Homepage - Top 5 materijala, zadnjih 5 računa
+[33m3bb9cb4d[m Homepage - stanje skladišta i prodaja po mjesecima
+[33m312c7782[m homepage - ukupni prihodi, izdani računi, aktivne ponude
+[33m215bac83[m kreiranje logova za sve potrebno
+[33ma662c788[m početak kreiranja warehouseChange zapisa za aktivnosti u aplikaciji
+[33m60fda768[m dodavanje imena zaposlanika u hamburger meni
+[33m772a3080[m dodavanje OQ koda za offer - za plaćanje ponude, kreiranje oq koda za račun (simulacija fiskalizacije)
+[33m5bc45e39[m kreiranje računa iz ponude + kreiranje PDF-a
+[33m1cf70b04[m addOffer ispravak, dodavanje stavki u offerItems
+[33mcc2dac9d[m provjera tokena i po isteku prebacivanje na login
+[33m0796766c[m dodavanje imena i prezimena i uloge u topnavBar te funkcije za odjavu
+[33mf7951724[m Usluge - dodavanje valute
+[33m8b439b8a[m popravak sitnih grešaka
+[33m11091775[m Dobavljači, dodavanje validacije u formu, provjera OIB i email
+[33me0da5f29[m validacija polja za Klijenta i Materijal
+[33m7bc931b5[m Korisnici - validacija za mail, lozinku, i sva se polja moraju ispuniti
+[33m97c020b4[m zaštita ruta, dovršavanje autorizacije, uređivanje prijave
+[33mef93838f[m kreiranje logina, dodavanje autorizacije i provjere valjanosti emaila i lozinke
+[33me2da9d0d[m rješavanje gitignore i razdvajanje package.json
+[33m3e9b6ff0[m Remove root node_modules from repo
+[33me244bbca[m dodavanje componenta i fonta
+[33md9904eb7[m kreiranje frontenda
+[33mc2ba3555[m bycript, jsonwebtoken, pdfkit, qrcode
+[33md5edb90a[m controller & routes
+[33mb0b91df0[m završeni modeli i veze između tablica
+[33mcdb47600[m konfiguracija servera i baze
