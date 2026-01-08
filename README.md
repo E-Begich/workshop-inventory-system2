@@ -13,6 +13,18 @@ The system is **scalable** and can be adapted for larger business systems.
 
 ---
 
+## 📸 Screenshots
+
+| Login | Dashboard | Materials |
+|-------|-----------|-----------|
+| ![Login](./screenshots/login.png) | ![Dashboard](./screenshots/Dashboard.png) | ![Materials](./screenshots/Materials.png) |
+
+| Suppliers | Offer / Quote | Invoice PDF |
+|-----------|---------------|-------------|
+| ![Suppliers](./screenshots/Supplier.png) | ![Offer](./screenshots/Offer.png) | ![Invoice PDF](./screenshots/InvoicePDF.png) |
+
+---
+
 ## ⚙️ Technologies
 - **Frontend:** `ReactJS` + `Bootstrap`  
 - **Backend:** `Node.js` + `Express`  
